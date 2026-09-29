@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'screens/splash_onboarding_screen.dart';
+import 'routes/app_routes.dart';
 import 'theme/app_colors.dart';
 
 void main() {
@@ -23,7 +23,9 @@ class BagiRasaApp extends StatelessWidget {
         scaffoldBackgroundColor: AppColors.backgroundWarm,
         useMaterial3: true,
       ),
-      home: const SplashOnboardingScreen(),
+      initialRoute: AppRoutes.login,
+      onGenerateRoute: AppRoutes.onGenerateRoute,
+      onUnknownRoute: AppRoutes.onUnknownRoute,
     );
   }
 }

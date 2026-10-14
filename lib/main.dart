@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
-import 'screens/splash_onboarding_screen.dart';
-import 'theme/app_colors.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'routes/app_routes.dart';
 
-void main() {
-  runApp(const BagiRasaApp());
-}
+void main() => runApp(const BagiRasaApp());
 
 class BagiRasaApp extends StatelessWidget {
   const BagiRasaApp({super.key});
@@ -12,18 +10,20 @@ class BagiRasaApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'BagiRasa - Penyaluran Makanan Surplus Kampus',
+      title: 'BagiRasa',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: AppColors.primaryGreen,
-          primary: AppColors.primaryGreen,
-          surface: AppColors.backgroundWarm,
-        ),
-        scaffoldBackgroundColor: AppColors.backgroundWarm,
+        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF2D5A3D)),
+        textTheme: GoogleFonts.nunitoSansTextTheme(),
         useMaterial3: true,
+        cardTheme: const CardThemeData(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(12)),
+          ),
+        ),
       ),
-      home: const SplashOnboardingScreen(),
+      initialRoute: AppRoutes.pickupPointList,
+      onGenerateRoute: AppRoutes.onGenerateRoute,
     );
   }
 }

@@ -10,18 +10,23 @@ class AppRoutes {
   static Route<dynamic> onGenerateRoute(RouteSettings settings) {
     switch (settings.name) {
       case pickupPointList:
-        return MaterialPageRoute(builder: (_) => const PickupPointListScreen());
+        return MaterialPageRoute(
+          settings: settings,
+          builder: (_) => const PickupPointListScreen(),
+        );
 
       case editPickupPoint:
         // Cegah crash jika arguments bukan PickupPoint
         if (settings.arguments is! PickupPoint) {
           return MaterialPageRoute(
+            settings: settings,
             builder: (_) => const Scaffold(
               body: Center(child: Text('Data titik tidak ditemukan.')),
             ),
           );
         }
         return MaterialPageRoute<PickupPoint>(
+          settings: settings,
           builder: (_) => EditPickupPointScreen(
             point: settings.arguments as PickupPoint,
           ),
@@ -29,6 +34,7 @@ class AppRoutes {
 
       default:
         return MaterialPageRoute(
+          settings: settings,
           builder: (_) => const Scaffold(
             body: Center(child: Text('Halaman tidak ditemukan.')),
           ),

@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+
 import '../models/pickup_point.dart';
 
 // Validator top-level — tidak perlu akses state, mudah diuji terpisah
 String? validateName(String? value) {
   if (value == null || value.trim().isEmpty) return 'Nama tidak boleh kosong';
+  if (value.trim().length < 10 || value.trim().length > 15) return 'Nama minimal 10 karakter dan maksimal 15 karakter';
   return null;
 }
 
@@ -104,23 +106,25 @@ class _EditPickupPointScreenState extends State<EditPickupPointScreen> {
             Text(
               'Koordinat: ${widget.point.latitude.toStringAsFixed(4)}, '
               '${widget.point.longitude.toStringAsFixed(4)}',
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: colorScheme.outline,
-                  ),
-            ),
-            const SizedBox(height: 24),
-            FilledButton(
-              // Tombol nonaktif saat loading
-              onPressed: _loading ? null : _simpan,
-              child: _loading
-                  ? const SizedBox(
-                      height: 18,
-                      width: 18,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : const Text('Simpan'),
+              style: Theme.of(context).textTheme.bodySmall
+                  ?.copyWith(color: colorScheme.outline),
             ),
           ],
+        ),
+      ),
+      bottomNavigationBar: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: FilledButton(
+            onPressed: _loading ? null : _simpan,
+            child: _loading
+                ? const SizedBox(
+                    height: 18,
+                    width: 18,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Text('Simpan'),
+          ),
         ),
       ),
     );

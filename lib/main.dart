@@ -1,8 +1,17 @@
 import 'package:flutter/material.dart';
-import 'screens/splash_onboarding_screen.dart';
-import 'theme/app_colors.dart';
+import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
+import 'core/theme/app_theme.dart';
+import 'core/widgets/main_shell.dart';
+import 'features/lokasi/data/pickup_point_repository.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+  // Lock to portrait – BagiRasa is portrait-only (390 × 844 baseline).
+  SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown,
+  ]);
   runApp(const BagiRasaApp());
 }
 
@@ -11,19 +20,17 @@ class BagiRasaApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'BagiRasa - Penyaluran Makanan Surplus Kampus',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: AppColors.primaryGreen,
-          primary: AppColors.primaryGreen,
-          surface: AppColors.backgroundWarm,
-        ),
-        scaffoldBackgroundColor: AppColors.backgroundWarm,
-        useMaterial3: true,
+    return MultiProvider(
+      providers: [
+        // Singleton repository shared across the whole app.
+        ChangeNotifierProvider(create: (_) => PickupPointRepository()),
+      ],
+      child: MaterialApp(
+        title: 'BagiRasa - Penyaluran Makanan Surplus Kampus',
+        debugShowCheckedModeBanner: false,
+        theme: AppTheme.light,
+        home: const MainShell(),
       ),
-      home: const SplashOnboardingScreen(),
     );
   }
 }

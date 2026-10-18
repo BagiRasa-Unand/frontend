@@ -157,5 +157,13 @@ abstract class AppTextStyles {
         letterSpacing: 1.6,
         color: AppColors.textSecondary,
       );
+
+  /// Stepper number display — ExtraBold 32/32
+  static TextStyle get stepperNumber => GoogleFonts.nunitoSans(
+        fontSize: 32,
+        height: 1.0,
+        fontWeight: FontWeight.w800,
+        color: AppColors.textPrimary,
+      );
 }
 

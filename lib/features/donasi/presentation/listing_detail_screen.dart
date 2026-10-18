@@ -10,6 +10,7 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_radius.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/widgets/chunky_button.dart';
+import '../../klaim/presentation/claim_form_sheet.dart';
 import '../../lokasi/data/pickup_point_repository.dart';
 import '../data/food_listing.dart';
 import '../data/food_listing_repository.dart';
@@ -122,10 +123,10 @@ class _ListingDetailBody extends StatelessWidget {
   }
 
   void _showClaimStub(BuildContext context) {
-    // TODO(integrate): Module B claim flow
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Fitur klaim belum tersedia')),
-    );
+    final listing = context.read<ListingDetailController>().listing;
+    if (listing != null) {
+      showClaimSheet(context, listing);
+    }
   }
 
 }

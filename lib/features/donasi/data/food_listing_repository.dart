@@ -111,6 +111,22 @@ class FoodListingRepository extends ChangeNotifier {
         createdAt: now.subtract(const Duration(minutes: 20)),
         expiresAt: now.add(const Duration(hours: 2)),
       ),
+      FoodListing(
+        id: 'food-007', donorId: 'donor-campus-3', donorName: 'Uni Evi (Kantin Barokah)',
+        name: 'Nasi Padang Ayam Gulai', foodType: FoodType.makananBerat,
+        description: 'Nasi padang hangat lengkap dengan gulai ayam dan daun singkong.',
+        quantityTotal: 8, quantityRemaining: 8, pickupPointId: 'pp-001',
+        createdAt: now.subtract(const Duration(minutes: 15)),
+        expiresAt: now.add(const Duration(hours: 3)),
+      ),
+      FoodListing(
+        id: 'food-008', donorId: 'donor-campus-4', donorName: 'Pak Wahyu (Kedai Camilan)',
+        name: 'Pisang Goreng Keju & Risoles', foodType: FoodType.camilan,
+        description: 'Paket camilan sore masih hangat, renyah dan higienis.',
+        quantityTotal: 5, quantityRemaining: 5, pickupPointId: 'pp-002',
+        createdAt: now.subtract(const Duration(minutes: 25)),
+        expiresAt: now.add(const Duration(hours: 2)),
+      ),
     ];
   }
 }

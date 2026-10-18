@@ -10,6 +10,8 @@ import '../theme/app_radius.dart';
 import '../../features/lokasi/presentation/map_screen.dart';
 import '../../features/donasi/presentation/home_screen.dart';
 import '../../features/donasi/presentation/donation_history_screen.dart';
+import '../../features/klaim/presentation/claim_tab_screen.dart';
+import '../../features/klaim/presentation/claim_history_screen.dart';
 import '../app_session.dart';
 
 /// 4-tab bottom navigation shell.
@@ -49,8 +51,7 @@ class _MainShellState extends State<MainShell> {
         children: [
           const HomeScreen(),
           const MapScreen(),
-          const _PlaceholderTab(
-              title: 'Klaim', icon: Icons.volunteer_activism_rounded),
+          const ClaimTabScreen(),
           _ProfilTab(),
         ],
       ),
@@ -181,28 +182,7 @@ class _BottomNav extends StatelessWidget {
   }
 }
 
-class _PlaceholderTab extends StatelessWidget {
-  const _PlaceholderTab({required this.title, required this.icon});
-  final String title;
-  final IconData icon;
 
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 48, color: AppColors.slate),
-          const SizedBox(height: 12),
-          Text(title, style: AppTextStyles.heading),
-          const SizedBox(height: 4),
-          Text('Halaman ini belum dibuat.',
-              style: AppTextStyles.caption),
-        ],
-      ),
-    );
-  }
-}
 
 /// Profil tab with the temporary navigation entry point.
 class _ProfilTab extends StatelessWidget {
@@ -235,6 +215,17 @@ class _ProfilTab extends StatelessWidget {
               ),
             ),
           ],
+          const SizedBox(height: 12),
+          // TODO(nav): temporary entry
+          _TempNavButton(
+            label: 'Riwayat Klaim Saya',
+            icon: Icons.history_rounded,
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (_) => const ClaimHistoryScreen(),
+              ),
+            ),
+          ),
         ],
       ),
     );

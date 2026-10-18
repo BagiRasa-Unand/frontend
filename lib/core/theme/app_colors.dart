@@ -79,5 +79,15 @@ abstract class AppColors {
   static const Color bannerShadow    = Color(0xFFFFDBCD); // gamified info banner shadow
   static const Color pillNeutral     = Color(0xFFF0E6E0); // demo badge / tab chip bg
   static const Color warningTextDark = Color(0xFF352F2B); // dark text for warning pill
+
+  // ── Extra tokens for Form Klaim (Module B) ─────────────────────────────────
+  static const Color amberBorder   = Color(0xFFFFE082); // callout 3D shadow for amber
+  static const Color amberSoftBg   = Color(0x26FFAE1A); // rgba(255, 174, 26, 0.15)
+  static const Color cyanBadge     = Color(0xFF79F3EA); // remaining stock badge bg
+  static const Color cyanBadgeText = Color(0xFF006F69); // remaining stock badge text
+  static const Color rescueBadgeBg   = Color(0x807CF6ED); // BagiRasa Rescue badge pill
+  static const Color dragHandle      = Color(0xFFEBE1DA); // bottom sheet drag handle
+  static const Color amberDarkShadow = Color(0xFFC98200); // 3D shadow for amber status badges
+  static const Color tealDarkText    = Color(0xFF00504C); // text for distance pill
 }
 

@@ -8,6 +8,8 @@ import '../../../core/theme/app_text_styles.dart';
 import '../../donasi/data/food_listing.dart';
 import '../../donasi/data/food_listing_repository.dart';
 import '../../donasi/presentation/listing_detail_screen.dart';
+import '../../klaim/data/claim_repository.dart';
+import '../../klaim/presentation/claim_detail_screen.dart';
 import '../data/app_notification.dart';
 import '../data/notification_repository.dart';
 
@@ -92,6 +94,25 @@ class _NotificationBodyState extends State<_NotificationBody> {
   void _openNotification(AppNotification notification) {
     final notificationRepository = context.read<NotificationRepository>();
     notificationRepository.markRead(notification.id);
+
+    if ((notification.type == AppNotificationType.claimStatus ||
+            notification.type == AppNotificationType.reminder) &&
+        notification.refId != null) {
+      final claim = context.read<ClaimRepository>().getById(notification.refId!);
+      if (claim == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Klaim tidak ditemukan')),
+        );
+        return;
+      }
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (_) => ClaimDetailScreen(claimId: notification.refId!),
+        ),
+      );
+      return;
+    }
+
     if (notification.type != AppNotificationType.newListing) return;
 
     final listingId = notification.refId;

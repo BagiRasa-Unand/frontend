@@ -221,6 +221,7 @@ class _ClaimTabScreenBody extends StatelessWidget {
               ),
             ),
           ),
+          const SizedBox(width: 8),
           const Icon(
             Icons.celebration_rounded,
             size: 18,
@@ -249,7 +250,7 @@ class _ClaimTabScreenBody extends StatelessWidget {
               onTap: () => controller.setSegment(0),
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 200),
-                padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
+                padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
                 decoration: BoxDecoration(
                   color: controller.selectedSegment == 0
                       ? AppColors.surface
@@ -267,23 +268,28 @@ class _ClaimTabScreenBody extends StatelessWidget {
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     Icon(
                       Icons.shopping_bag_outlined,
-                      size: 16,
+                      size: 15,
                       color: controller.selectedSegment == 0
                           ? AppColors.primary
                           : AppColors.textSecondary,
                     ),
-                    const SizedBox(width: 6),
-                    Text(
-                      'Klaim Saya',
-                      style: AppTextStyles.button.copyWith(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w800,
-                        color: controller.selectedSegment == 0
-                            ? AppColors.primary
-                            : AppColors.textSecondary,
+                    const SizedBox(width: 4),
+                    Flexible(
+                      child: Text(
+                        'Klaim Saya',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppTextStyles.button.copyWith(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w800,
+                          color: controller.selectedSegment == 0
+                              ? AppColors.primary
+                              : AppColors.textSecondary,
+                        ),
                       ),
                     ),
                   ],
@@ -299,7 +305,7 @@ class _ClaimTabScreenBody extends StatelessWidget {
                 onTap: () => controller.setSegment(1),
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 200),
-                  padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
+                  padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
                   decoration: BoxDecoration(
                     color: controller.selectedSegment == 1
                         ? AppColors.surface
@@ -317,29 +323,34 @@ class _ClaimTabScreenBody extends StatelessWidget {
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
                     children: [
                       Icon(
                         Icons.inbox_outlined,
-                        size: 16,
+                        size: 15,
                         color: controller.selectedSegment == 1
                             ? AppColors.primary
                             : AppColors.textSecondary,
                       ),
-                      const SizedBox(width: 6),
-                      Text(
-                        'Permintaan Masuk',
-                        style: AppTextStyles.button.copyWith(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w800,
-                          color: controller.selectedSegment == 1
-                              ? AppColors.primary
-                              : AppColors.textSecondary,
+                      const SizedBox(width: 4),
+                      Flexible(
+                        child: Text(
+                          'Permintaan Masuk',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: AppTextStyles.button.copyWith(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w800,
+                            color: controller.selectedSegment == 1
+                                ? AppColors.primary
+                                : AppColors.textSecondary,
+                          ),
                         ),
                       ),
                       if (controller.incomingPendingCount > 0) ...[
-                        const SizedBox(width: 6),
+                        const SizedBox(width: 4),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                          padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
                           decoration: BoxDecoration(
                             color: AppColors.primary,
                             borderRadius: BorderRadius.circular(AppRadius.r9999),
@@ -347,7 +358,7 @@ class _ClaimTabScreenBody extends StatelessWidget {
                           child: Text(
                             '${controller.incomingPendingCount}',
                             style: AppTextStyles.badge.copyWith(
-                              fontSize: 11,
+                              fontSize: 10,
                               color: AppColors.surface,
                               fontWeight: FontWeight.w700,
                             ),
@@ -371,27 +382,35 @@ class _ClaimTabScreenBody extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Row(
-          children: [
-            Container(
-              width: 8,
-              height: 8,
-              decoration: const BoxDecoration(
-                color: AppColors.tealDeep,
-                shape: BoxShape.circle,
+        Flexible(
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 8,
+                height: 8,
+                decoration: const BoxDecoration(
+                  color: AppColors.tealDeep,
+                  shape: BoxShape.circle,
+                ),
               ),
-            ),
-            const SizedBox(width: 4),
-            Text(
-              'Status sinkron real-time',
-              style: AppTextStyles.badge.copyWith(
-                fontSize: 11,
-                color: AppColors.textSecondary,
-                fontWeight: FontWeight.w700,
+              const SizedBox(width: 4),
+              Flexible(
+                child: Text(
+                  'Status sinkron real-time',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTextStyles.badge.copyWith(
+                    fontSize: 11,
+                    color: AppColors.textSecondary,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
+        const SizedBox(width: 8),
         GestureDetector(
           onTap: () => controller.toggleSimulateEmpty(),
           child: Container(
@@ -578,36 +597,39 @@ class _ClaimTabScreenBody extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         // Filter Chips Row
-        Row(
-          children: [
-            FilterChip(
-              label: Text('Perlu diputuskan (${controller.incomingPendingCount})'),
-              selected: controller.incomingFilterIndex == 0,
-              selectedColor: AppColors.primarySoft,
-              checkmarkColor: AppColors.primary,
-              labelStyle: AppTextStyles.chip.copyWith(
-                color: controller.incomingFilterIndex == 0
-                    ? AppColors.primaryDeep
-                    : AppColors.textSecondary,
-                fontWeight: FontWeight.w700,
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            children: [
+              FilterChip(
+                label: Text('Perlu diputuskan (${controller.incomingPendingCount})'),
+                selected: controller.incomingFilterIndex == 0,
+                selectedColor: AppColors.primarySoft,
+                checkmarkColor: AppColors.primary,
+                labelStyle: AppTextStyles.chip.copyWith(
+                  color: controller.incomingFilterIndex == 0
+                      ? AppColors.primaryDeep
+                      : AppColors.textSecondary,
+                  fontWeight: FontWeight.w700,
+                ),
+                onSelected: (_) => controller.setIncomingFilter(0),
               ),
-              onSelected: (_) => controller.setIncomingFilter(0),
-            ),
-            const SizedBox(width: 8),
-            FilterChip(
-              label: const Text('Sudah diputuskan'),
-              selected: controller.incomingFilterIndex == 1,
-              selectedColor: AppColors.primarySoft,
-              checkmarkColor: AppColors.primary,
-              labelStyle: AppTextStyles.chip.copyWith(
-                color: controller.incomingFilterIndex == 1
-                    ? AppColors.primaryDeep
-                    : AppColors.textSecondary,
-                fontWeight: FontWeight.w700,
+              const SizedBox(width: 8),
+              FilterChip(
+                label: const Text('Sudah diputuskan'),
+                selected: controller.incomingFilterIndex == 1,
+                selectedColor: AppColors.primarySoft,
+                checkmarkColor: AppColors.primary,
+                labelStyle: AppTextStyles.chip.copyWith(
+                  color: controller.incomingFilterIndex == 1
+                      ? AppColors.primaryDeep
+                      : AppColors.textSecondary,
+                  fontWeight: FontWeight.w700,
+                ),
+                onSelected: (_) => controller.setIncomingFilter(1),
               ),
-              onSelected: (_) => controller.setIncomingFilter(1),
-            ),
-          ],
+            ],
+          ),
         ),
         const SizedBox(height: 12),
 
@@ -653,6 +675,7 @@ class _ClaimTabScreenBody extends StatelessWidget {
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
+                      const SizedBox(width: 8),
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                         decoration: BoxDecoration(

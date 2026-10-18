@@ -154,12 +154,17 @@ class ClaimCard extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           ClaimStatusBadge(status: claim.status),
-                          Text(
-                            _formattedClaimCode(claim.id),
-                            style: AppTextStyles.badge.copyWith(
-                              color: AppColors.textSecondary,
-                              fontSize: 11,
-                              fontWeight: FontWeight.w700,
+                          const SizedBox(width: 4),
+                          Flexible(
+                            child: Text(
+                              _formattedClaimCode(claim.id),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: AppTextStyles.badge.copyWith(
+                                color: AppColors.textSecondary,
+                                fontSize: 11,
+                                fontWeight: FontWeight.w700,
+                              ),
                             ),
                           ),
                         ],
@@ -263,60 +268,67 @@ class ClaimCard extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Row(
-            children: [
-              Container(
-                width: 32,
-                height: 32,
-                decoration: BoxDecoration(
-                  color: AppColors.primarySoft,
-                  borderRadius: BorderRadius.circular(AppRadius.r8),
-                ),
-                child: const Icon(
-                  Icons.alarm_rounded,
-                  size: 18,
-                  color: AppColors.primary,
-                ),
-              ),
-              const SizedBox(width: 8),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Ambil sebelum $timeStr WIB',
-                    style: AppTextStyles.badge.copyWith(
-                      color: AppColors.textSecondary,
-                      fontSize: 11,
-                      fontWeight: FontWeight.w700,
-                    ),
+          Expanded(
+            child: Row(
+              children: [
+                Container(
+                  width: 32,
+                  height: 32,
+                  decoration: BoxDecoration(
+                    color: AppColors.primarySoft,
+                    borderRadius: BorderRadius.circular(AppRadius.r8),
                   ),
-                  Row(
+                  child: const Icon(
+                    Icons.alarm_rounded,
+                    size: 18,
+                    color: AppColors.primary,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        minutesLeft > 0
-                            ? 'Sisa $minutesLeft menit'
-                            : 'Waktu habis',
-                        style: AppTextStyles.heading.copyWith(
-                          fontSize: 14,
+                        'Ambil sebelum $timeStr WIB',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppTextStyles.badge.copyWith(
+                          color: AppColors.textSecondary,
+                          fontSize: 11,
                           fontWeight: FontWeight.w700,
-                          color: AppColors.danger,
                         ),
                       ),
-                      const SizedBox(width: 4),
-                      Container(
-                        width: 6,
-                        height: 6,
-                        decoration: const BoxDecoration(
-                          color: AppColors.danger,
-                          shape: BoxShape.circle,
-                        ),
+                      Row(
+                        children: [
+                          Text(
+                            minutesLeft > 0
+                                ? 'Sisa $minutesLeft menit'
+                                : 'Waktu habis',
+                            style: AppTextStyles.heading.copyWith(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.danger,
+                            ),
+                          ),
+                          const SizedBox(width: 4),
+                          Container(
+                            width: 6,
+                            height: 6,
+                            decoration: const BoxDecoration(
+                              color: AppColors.danger,
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
-                ],
-              ),
-            ],
+                ),
+              ],
+            ),
           ),
+          const SizedBox(width: 8),
           // "KODE KLAIM" / "LIHAT WAKTU" action button
           InkWell(
             onTap: () {

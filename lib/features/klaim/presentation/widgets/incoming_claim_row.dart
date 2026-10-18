@@ -49,40 +49,49 @@ class IncomingClaimRow extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Row(
-                children: [
-                  CircleAvatar(
-                    radius: 16,
-                    backgroundColor: AppColors.primarySoft,
-                    child: Text(
-                      claim.claimantName.isNotEmpty
-                          ? claim.claimantName[0].toUpperCase()
-                          : 'U',
-                      style: AppTextStyles.badge.copyWith(
-                        color: AppColors.primaryDeep,
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        claim.claimantName,
-                        style: AppTextStyles.cardTitle.copyWith(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w700,
+              Expanded(
+                child: Row(
+                  children: [
+                    CircleAvatar(
+                      radius: 16,
+                      backgroundColor: AppColors.primarySoft,
+                      child: Text(
+                        claim.claimantName.isNotEmpty
+                            ? claim.claimantName[0].toUpperCase()
+                            : 'U',
+                        style: AppTextStyles.badge.copyWith(
+                          color: AppColors.primaryDeep,
+                          fontWeight: FontWeight.w800,
                         ),
                       ),
-                      Text(
-                        'Diajukan pukul ${_formatTime(claim.createdAt)}',
-                        style: AppTextStyles.caption.copyWith(fontSize: 11),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            claim.claimantName,
+                            style: AppTextStyles.cardTitle.copyWith(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w700,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          Text(
+                            'Diajukan pukul ${_formatTime(claim.createdAt)}',
+                            style: AppTextStyles.caption.copyWith(fontSize: 11),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-                ],
+                    ),
+                  ],
+                ),
               ),
+              const SizedBox(width: 8),
               ClaimStatusBadge(status: claim.status),
             ],
           ),
@@ -92,14 +101,19 @@ class IncomingClaimRow extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                'Permintaan: ${claim.quantity} porsi',
-                style: AppTextStyles.body.copyWith(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 13,
+              Expanded(
+                child: Text(
+                  'Permintaan: ${claim.quantity} porsi',
+                  style: AppTextStyles.body.copyWith(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 13,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
-              if (isAntre)
+              if (isAntre) ...[
+                const SizedBox(width: 8),
                 Text(
                   'Posisi Antrean: #${queuePosition ?? 1}',
                   style: AppTextStyles.caption.copyWith(
@@ -107,6 +121,7 @@ class IncomingClaimRow extends StatelessWidget {
                     color: AppColors.slate,
                   ),
                 ),
+              ],
             ],
           ),
           const SizedBox(height: 8),
@@ -190,6 +205,8 @@ class IncomingClaimRow extends StatelessWidget {
                   fontSize: 11,
                   fontStyle: FontStyle.italic,
                 ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
           ],
         ],

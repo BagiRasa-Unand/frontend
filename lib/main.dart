@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
-import 'screens/splash_onboarding_screen.dart';
+import 'package:flutter_web_plugins/url_strategy.dart';
+import 'routes/app_routes.dart';
 import 'theme/app_colors.dart';
 
 void main() {
+  usePathUrlStrategy();
   runApp(const BagiRasaApp());
 }
 
@@ -16,14 +18,15 @@ class BagiRasaApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
-          seedColor: AppColors.primaryGreen,
-          primary: AppColors.primaryGreen,
+          seedColor: const Color.fromARGB(255, 45, 90, 61),
+          primary: const Color.fromARGB(255, 203, 53, 173),
           surface: AppColors.backgroundWarm,
         ),
         scaffoldBackgroundColor: AppColors.backgroundWarm,
         useMaterial3: true,
       ),
-      home: const SplashOnboardingScreen(),
+      initialRoute: AppRoutes.listingList,
+      onGenerateRoute: AppRoutes.onGenerateRoute,
     );
   }
 }

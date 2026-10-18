@@ -16,6 +16,6 @@ void main() {
     await tester.pump();
 
     // Verify that the app renders without crashing.
-    expect(find.text('BagiRasa'), findsOneWidget);
+    expect(find.text('Listing Saya'), findsOneWidget);
   });
 }

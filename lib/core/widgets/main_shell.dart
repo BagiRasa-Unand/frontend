@@ -8,12 +8,15 @@ import '../theme/app_colors.dart';
 import '../theme/app_text_styles.dart';
 import '../theme/app_radius.dart';
 import '../../features/lokasi/presentation/map_screen.dart';
+import '../../features/donasi/presentation/home_screen.dart';
+import '../../features/donasi/presentation/donation_history_screen.dart';
+import '../app_session.dart';
 
 /// 4-tab bottom navigation shell.
 ///
 /// Tabs without a real screen show a simple placeholder widget.
 class MainShell extends StatefulWidget {
-  const MainShell({super.key, this.initialIndex = 1});
+  const MainShell({super.key, this.initialIndex = 0});
 
   final int initialIndex;
 
@@ -44,7 +47,7 @@ class _MainShellState extends State<MainShell> {
       body: IndexedStack(
         index: _currentIndex,
         children: [
-          const _PlaceholderTab(title: 'Beranda', icon: Icons.home_rounded),
+          const HomeScreen(),
           const MapScreen(),
           const _PlaceholderTab(
               title: 'Klaim', icon: Icons.volunteer_activism_rounded),
@@ -219,6 +222,19 @@ class _ProfilTab extends StatelessWidget {
             icon: Icons.store_rounded,
             onTap: () => _openPickupPointList(context),
           ),
+          if (kIsDonor) ...[
+            const SizedBox(height: 12),
+            // TODO(nav): temporary entry – remove when real Profil screen exists.
+            _TempNavButton(
+              label: 'Riwayat Donasi Saya',
+              icon: Icons.history_edu_rounded,
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => const DonationHistoryScreen(),
+                ),
+              ),
+            ),
+          ],
         ],
       ),
     );

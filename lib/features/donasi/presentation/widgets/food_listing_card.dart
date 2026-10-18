@@ -144,7 +144,7 @@ class _ListingDetails extends StatelessWidget {
   Widget build(BuildContext context) {
     final titleStyle = AppTextStyles.cardTitle.copyWith(
       fontSize: 18,
-      height: 24 / 18,
+      height: 1.15,
       color: status == ListingStatus.habisDiklaim
           ? AppColors.slate
           : status == ListingStatus.kadaluarsa
@@ -163,15 +163,15 @@ class _ListingDetails extends StatelessWidget {
         status == ListingStatus.kadaluarsa;
 
     return SizedBox(
-      height: 112,
-      child: Column(
+      height: 114,
+      child: ClipRect(
+        child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(listing.name,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
               style: titleStyle),
-          const SizedBox(height: 2),
           Row(
             children: [
               Icon(Icons.storefront_outlined, size: 14, color: accent),
@@ -203,7 +203,6 @@ class _ListingDetails extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 4),
           ClipRRect(
             borderRadius: BorderRadius.circular(AppRadius.r9999),
             child: SizedBox(
@@ -249,6 +248,7 @@ class _ListingDetails extends StatelessWidget {
             ],
           ),
         ],
+        ),
       ),
     );
   }

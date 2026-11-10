@@ -517,18 +517,18 @@ class _StatusHeroCard extends StatelessWidget {
   }
 
   Widget _buildMascot(ClaimStatus status) {
+    // Fallback langsung ke rasi_empty bila aset ilustrasi varian belum ada
     final String assetPath;
     switch (status) {
-      case ClaimStatus.diterima:
-        assetPath = 'assets/images/rasi_happy.png';
-        break;
-      case ClaimStatus.menunggu:
-      case ClaimStatus.antre:
-        assetPath = 'assets/images/rasi_waiting.png';
-        break;
       case ClaimStatus.ditolak:
       case ClaimStatus.dibatalkan:
         assetPath = 'assets/images/rasi_worried.png';
+        break;
+      case ClaimStatus.diterima:
+      case ClaimStatus.menunggu:
+      case ClaimStatus.antre:
+      default:
+        assetPath = 'assets/images/rasi_empty.png';
         break;
     }
 
@@ -537,15 +537,6 @@ class _StatusHeroCard extends StatelessWidget {
       width: 76,
       height: 76,
       fit: BoxFit.contain,
-      errorBuilder: (context, error, stackTrace) {
-        // TODO: assets/images/rasi_happy.png atau rasi_waiting.png belum tersedia di direktori assets, menggunakan rasi_empty.png sebagai fallback per Rule 6
-        return Image.asset(
-          'assets/images/rasi_empty.png',
-          width: 76,
-          height: 76,
-          fit: BoxFit.contain,
-        );
-      },
     );
   }
 

@@ -75,7 +75,8 @@ class _ListingDetailBody extends StatelessWidget {
                 onShare: () => _showShareMessage(context),
               ),
             ),
-            const SliverToBoxAdapter(child: _PreviewSwitcher()),
+            if (kShowDemoControls)
+              const SliverToBoxAdapter(child: _PreviewSwitcher()),
             SliverToBoxAdapter(
               child: _HeroPhoto(
                 listing: listing,
@@ -651,7 +652,7 @@ class _DescriptionCard extends StatelessWidget {
                       Text('Catatan Penting Pengambilan',
                           style: AppTextStyles.badge),
                       const SizedBox(height: 2),
-                      Text('Tunjukkan kode QR klaim aplikasi kepada petugas stan. Sangat disarankan membawa tote bag atau kantong sendiri demi kelestarian kampus hijau.',
+                      Text('Tunjukkan kode klaim aplikasi kepada petugas stan. Sangat disarankan membawa tote bag atau kantong sendiri demi kelestarian kampus hijau.',
                           style: AppTextStyles.caption),
                     ],
                   ),

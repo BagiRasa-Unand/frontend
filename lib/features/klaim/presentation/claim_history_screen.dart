@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
+import '../../../core/app_session.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_radius.dart';
 import '../../../core/theme/app_text_styles.dart';
@@ -45,9 +46,11 @@ class _ClaimHistoryBody extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
               sliver: SliverList(
                 delegate: SliverChildListDelegate([
-                  // View Switcher (Daftar Riwayat vs Pratinjau Kosong)
-                  _ViewSwitcher(controller: controller),
-                  const SizedBox(height: 16),
+                  // View Switcher (Daftar Riwayat vs Pratinjau Kosong) - Demo Only
+                  if (kShowDemoControls) ...[
+                    _ViewSwitcher(controller: controller),
+                    const SizedBox(height: 16),
+                  ],
 
                   // Reward Gamification Summary Card
                   _RewardSummaryCard(controller: controller),

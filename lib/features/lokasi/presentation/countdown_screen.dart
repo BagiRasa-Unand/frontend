@@ -10,7 +10,7 @@ import '../logic/countdown_controller.dart';
 
 /// Control flag to show simulation chips for testing all 4 visual states live.
 /// Set to `false` for the final production build.
-const bool kShowCountdownDemoControls = true;
+const bool kShowCountdownDemoControls = false;
 
 /// Screen "Countdown Pengambilan" (Module C).
 ///

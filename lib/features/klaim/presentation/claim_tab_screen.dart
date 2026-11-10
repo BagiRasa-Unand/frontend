@@ -60,9 +60,11 @@ class _ClaimTabScreenBody extends StatelessWidget {
                     _buildSegmentedControl(controller),
                     const SizedBox(height: 12),
 
-                    // 3. Status sync & Demo "Simulasikan Kosong"
-                    _buildStatusAndSimulateRow(controller),
-                    const SizedBox(height: 12),
+                    // 3. Status sync & Demo "Simulasikan Kosong" (kShowDemoControls only)
+                    if (kShowDemoControls) ...[
+                      _buildStatusAndSimulateRow(controller),
+                      const SizedBox(height: 12),
+                    ],
 
                     // 4. Interactive Simulation Demo Chips (kShowDemoControls)
                     if (kShowDemoControls) ...[

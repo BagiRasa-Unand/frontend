@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_radius.dart';
 
-/// Floating action button untuk memusatkan peta ke lokasi pengguna (STUB).
+/// Floating action button untuk memusatkan peta ke lokasi pengguna.
 class MapGpsFloatingButton extends StatefulWidget {
   const MapGpsFloatingButton({super.key, this.onCenter});
 
@@ -16,18 +16,7 @@ class _MapGpsFloatingButtonState extends State<MapGpsFloatingButton> {
   bool _pressed = false;
 
   void _handleTap() {
-    // Panggil callback reposisi peta
     widget.onCenter?.call();
-
-    // Sesuai STUB POLICY: tampilkan SnackBar
-    // TODO(stub): implement real GPS tracking and permission check
-    ScaffoldMessenger.of(context).hideCurrentSnackBar();
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Fitur ini belum tersedia'),
-        duration: Duration(seconds: 2),
-      ),
-    );
   }
 
   @override

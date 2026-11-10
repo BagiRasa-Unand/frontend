@@ -9,6 +9,7 @@ import '../data/pickup_point_repository.dart';
 import '../data/map_listing.dart';
 import '../logic/map_controller.dart';
 import 'countdown_screen.dart';
+import 'location_gate_view.dart';
 import 'widgets/map_top_header.dart';
 import 'widgets/map_search_filter_bar.dart';
 import 'widgets/map_marker_pin.dart';
@@ -31,10 +32,6 @@ class MapScreen extends StatelessWidget {
 
 class _MapScreenBody extends StatelessWidget {
   const _MapScreenBody();
-
-  // TODO(stub): dummy fixed user GPS coordinate shown in Figma design
-  static const LatLng _kDummyUserLocation =
-      LatLng(kCampusCenterLat - 0.0002, kCampusCenterLng + 0.0004);
 
   @override
   Widget build(BuildContext context) {
@@ -82,18 +79,19 @@ class _MapScreenBody extends StatelessWidget {
                 ],
               ),
 
-              // User Location Marker
-              const MarkerLayer(
-                markers: [
-                  Marker(
-                    point: _kDummyUserLocation,
-                    width: 160,
-                    height: 95,
-                    alignment: Alignment.center,
-                    child: MapUserLocationMarker(),
-                  ),
-                ],
-              ),
+              // User Location Marker (shown only when a valid position exists)
+              if (notifier.userLocation != null)
+                MarkerLayer(
+                  markers: [
+                    Marker(
+                      point: notifier.userLocation!,
+                      width: 160,
+                      height: 95,
+                      alignment: Alignment.center,
+                      child: const MapUserLocationMarker(),
+                    ),
+                  ],
+                ),
 
               // Active Pickup Point Pins
               MarkerLayer(
@@ -148,8 +146,12 @@ class _MapScreenBody extends StatelessWidget {
             right: 20,
             bottom: MediaQuery.of(context).size.height * 0.38,
             child: MapGpsFloatingButton(
-              onCenter: () {
-                notifier.mapController.move(_kDummyUserLocation, 17.0);
+              onCenter: () async {
+                final result = await ensureLocation(context, allowManual: false);
+                if (!result.cancelled && result.position != null) {
+                  notifier.setUserLocation(result.position!);
+                  notifier.mapController.move(result.position!, 17.0);
+                }
               },
             ),
           ),

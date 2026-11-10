@@ -527,7 +527,6 @@ class _StatusHeroCard extends StatelessWidget {
       case ClaimStatus.diterima:
       case ClaimStatus.menunggu:
       case ClaimStatus.antre:
-      default:
         assetPath = 'assets/images/rasi_empty.png';
         break;
     }

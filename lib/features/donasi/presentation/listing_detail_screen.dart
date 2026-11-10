@@ -15,6 +15,7 @@ import '../../lokasi/data/pickup_point_repository.dart';
 import '../data/food_listing.dart';
 import '../data/food_listing_repository.dart';
 import '../logic/listing_detail_controller.dart';
+import '../../lokasi/presentation/route_screen.dart';
 import 'delete_listing_sheet.dart';
 import 'listing_form_screen.dart';
 import 'widgets/status_badge.dart';
@@ -580,9 +581,12 @@ class _PickupCard extends StatelessWidget {
                 Text('Rute jalan kaki tersedia', style: AppTextStyles.badge),
                 GestureDetector(
                   onTap: () {
-                    // TODO(stub): connect to the route/map flow.
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Fitur ini belum tersedia')),
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => RouteScreen(
+                          pickupPointId: point.id as String,
+                        ),
+                      ),
                     );
                   },
                   child: Text('Buka Peta  →', style: AppTextStyles.badge.copyWith(

@@ -7,6 +7,7 @@ import 'core/widgets/main_shell.dart';
 import 'features/donasi/data/food_listing_repository.dart';
 import 'features/klaim/data/claim_repository.dart';
 import 'features/klaim/logic/claim_notification_mapper.dart';
+import 'features/lokasi/data/location_service.dart';
 import 'features/lokasi/data/pickup_point_repository.dart';
 import 'features/notifikasi/data/notification_repository.dart';
 
@@ -28,6 +29,7 @@ class BagiRasaApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         // Singleton repository shared across the whole app.
+        ChangeNotifierProvider(create: (_) => LocationService()),
         ChangeNotifierProvider(create: (_) => PickupPointRepository()),
         ChangeNotifierProvider(create: (_) => FoodListingRepository()),
         ChangeNotifierProvider(create: (_) => NotificationRepository()),

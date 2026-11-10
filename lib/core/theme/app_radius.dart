@@ -22,6 +22,9 @@ abstract class AppRadius {
   /// 20 px — sheets / modals
   static const double r20 = 20;
 
+  /// 24 px — bottom card top corners
+  static const double r24 = 24;
+
   /// 28 px — pills / FABs / bottom sheet top corners
   static const double r28 = 28;
 

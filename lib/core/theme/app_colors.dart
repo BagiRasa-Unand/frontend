@@ -89,5 +89,11 @@ abstract class AppColors {
   static const Color dragHandle      = Color(0xFFEBE1DA); // bottom sheet drag handle
   static const Color amberDarkShadow = Color(0xFFC98200); // 3D shadow for amber status badges
   static const Color tealDarkText    = Color(0xFF00504C); // text for distance pill
+
+  // ── Extra tokens for Izin Lokasi & GPS (Module C) ─────────────────────────
+  static const Color backgroundWarm  = Color(0xFFFFF8F5); // location gate main bg
+  static const Color cyanBright      = Color(0xFF7CF6ED); // mascot sub-badge bg
+  static const Color cyanDeepText    = Color(0xFF00201E); // mascot sub-badge text & icon
+  static const Color indigoDeepText  = Color(0xFF000965); // benefit item 3 icon
 }
 

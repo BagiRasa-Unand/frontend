@@ -14,6 +14,7 @@ import '../../../../core/widgets/chunky_button.dart';
 import '../data/pickup_point.dart';
 import '../data/pickup_point_repository.dart';
 import '../logic/pickup_point_form_notifier.dart';
+import 'location_gate_view.dart';
 
 /// Screen for creating or updating a [PickupPoint] (Module C CREATE/UPDATE).
 ///
@@ -636,16 +637,13 @@ class _MapCard extends StatelessWidget {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      // STUB Button per ui_rules.md
                       GestureDetector(
-                        onTap: () {
-                          // TODO(stub): GPS current location retrieval
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Fitur ini belum tersedia'),
-                              duration: Duration(seconds: 2),
-                            ),
-                          );
+                        onTap: () async {
+                          final result = await ensureLocation(context, allowManual: true);
+                          if (!result.cancelled && result.position != null) {
+                            notifier.setPin(result.position!.latitude, result.position!.longitude);
+                            mapController.move(result.position!, 16.5);
+                          }
                         },
                         child: Container(
                           padding: const EdgeInsets.symmetric(

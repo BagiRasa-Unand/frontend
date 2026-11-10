@@ -37,3 +37,11 @@ Flutter, Android, portrait, design artboard 390x844. All UI text is Indonesian. 
 
 ## Always finish with
 (a) `flutter analyze` with zero errors, (b) list of files created/changed, (c) the extracted texts, (d) every stub you added, (e) anything you could not reproduce exactly and why.
+
+## Location & routing additions
+- Allowed packages now also include: geolocator (location task) and http (routing task). Use the latest stable versions compatible with this Flutter SDK. If Android Gradle/SDK setup breaks, stop and tell me; do not downgrade silently.
+- All location access goes through lib/features/lokasi/data/location_service.dart. No screen calls Geolocator directly.
+- Never fake a position. When location is unavailable, show the location gate or a clear empty state. kCampusCenter is only the map's initial camera, never the user's position.
+- Routing uses public OSRM demo endpoints with no API key: at most 1 request per second, send a User-Agent, cache results, and ALWAYS fall back to a straight-line estimate labelled as an estimate.
+- The text "© OpenStreetMap contributors" must be visible on every map screen.
+- Any distance or time that does not come from a routing response must be labelled as an estimate.

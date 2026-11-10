@@ -3,6 +3,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../data/map_listing.dart';
+import '../route_screen.dart';
 
 /// Draggable scrollable bottom sheet menampilkan daftar makanan yang dapat diselamatkan (Module C).
 class MapRescueBottomSheet extends StatelessWidget {
@@ -266,8 +267,12 @@ class _ListingCard extends StatelessWidget {
 
                       const SizedBox(width: 8),
 
-                      // Rute Chunky Button (STUB)
-                      _RouteChunkyButton(pickupPointName: listing.pickupPointName),
+                      // Rute Chunky Button
+                      _RouteChunkyButton(
+                        pickupPointId: listing.pickupPointId,
+                        pickupDeadline: listing.pickupDeadline,
+                        listingName: listing.name,
+                      ),
                     ],
                   ),
                 ],
@@ -387,9 +392,15 @@ class _ListingCard extends StatelessWidget {
 }
 
 class _RouteChunkyButton extends StatefulWidget {
-  const _RouteChunkyButton({required this.pickupPointName});
+  const _RouteChunkyButton({
+    required this.pickupPointId,
+    this.pickupDeadline,
+    this.listingName,
+  });
 
-  final String pickupPointName;
+  final String pickupPointId;
+  final DateTime? pickupDeadline;
+  final String? listingName;
 
   @override
   State<_RouteChunkyButton> createState() => _RouteChunkyButtonState();
@@ -399,13 +410,13 @@ class _RouteChunkyButtonState extends State<_RouteChunkyButton> {
   bool _pressed = false;
 
   void _handleTap() {
-    // Sesuai STUB POLICY: tampilkan SnackBar
-    // TODO(stub): navigation route to pickup point
-    ScaffoldMessenger.of(context).hideCurrentSnackBar();
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Fitur ini belum tersedia'),
-        duration: Duration(seconds: 2),
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => RouteScreen(
+          pickupPointId: widget.pickupPointId,
+          pickupDeadline: widget.pickupDeadline,
+          listingName: widget.listingName,
+        ),
       ),
     );
   }

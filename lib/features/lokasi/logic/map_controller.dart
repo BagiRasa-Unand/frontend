@@ -35,6 +35,14 @@ class MapNotifier extends ChangeNotifier {
   String? _selectedListingId;
   String? get selectedListingId => _selectedListingId;
 
+  LatLng? _userLocation;
+  LatLng? get userLocation => _userLocation;
+
+  void setUserLocation(LatLng pos) {
+    _userLocation = pos;
+    notifyListeners();
+  }
+
   /// Daftar listing terfilter berdasarkan pencarian dan filter chip.
   List<MapListing> get filteredListings {
     List<MapListing> list = List.of(_allListings);

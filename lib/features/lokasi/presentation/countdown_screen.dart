@@ -7,6 +7,7 @@ import '../../../core/theme/app_radius.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/widgets/chunky_button.dart';
 import '../logic/countdown_controller.dart';
+import 'route_screen.dart';
 
 /// Control flag to show simulation chips for testing all 4 visual states live.
 /// Set to `false` for the final production build.
@@ -31,6 +32,7 @@ class CountdownScreen extends StatelessWidget {
     this.voucherCode = '9482',
     this.orderCode = '#BGR-9482',
     this.distanceText = '120m',
+    this.pickupPointId = 'pp-1',
   });
 
   final DateTime pickupDeadline;
@@ -41,6 +43,7 @@ class CountdownScreen extends StatelessWidget {
   final String voucherCode;
   final String orderCode;
   final String distanceText;
+  final String pickupPointId;
 
   @override
   Widget build(BuildContext context) {
@@ -56,6 +59,8 @@ class CountdownScreen extends StatelessWidget {
         voucherCode: voucherCode,
         orderCode: orderCode,
         distanceText: distanceText,
+        pickupPointId: pickupPointId,
+        pickupDeadline: pickupDeadline,
       ),
     );
   }
@@ -69,6 +74,8 @@ class _CountdownScreenBody extends StatefulWidget {
     required this.voucherCode,
     required this.orderCode,
     required this.distanceText,
+    required this.pickupPointId,
+    required this.pickupDeadline,
   });
 
   final String listingName;
@@ -77,6 +84,8 @@ class _CountdownScreenBody extends StatefulWidget {
   final String voucherCode;
   final String orderCode;
   final String distanceText;
+  final String pickupPointId;
+  final DateTime pickupDeadline;
 
   @override
   State<_CountdownScreenBody> createState() => _CountdownScreenBodyState();
@@ -122,16 +131,13 @@ class _CountdownScreenBodyState extends State<_CountdownScreenBody> {
   }
 
   void _onNavigateLocation() {
-    // TODO(stub): route navigation not implemented
-    ScaffoldMessenger.of(context).hideCurrentSnackBar();
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          'Fitur navigasi rute ke lokasi belum tersedia.',
-          style: AppTextStyles.caption.copyWith(color: AppColors.surface),
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => RouteScreen(
+          pickupPointId: widget.pickupPointId,
+          pickupDeadline: widget.pickupDeadline,
+          listingName: widget.listingName,
         ),
-        backgroundColor: AppColors.textPrimary,
-        duration: const Duration(seconds: 2),
       ),
     );
   }

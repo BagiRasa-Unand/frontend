@@ -372,7 +372,7 @@ class ClaimCard extends StatelessWidget {
                   ),
                   const SizedBox(width: 4),
                   const Icon(
-                    Icons.qr_code_2_rounded,
+                    Icons.pin_outlined,
                     size: 14,
                     color: AppColors.surface,
                   ),

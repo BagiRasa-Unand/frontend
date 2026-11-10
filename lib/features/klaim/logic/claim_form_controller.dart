@@ -35,8 +35,12 @@ class ClaimFormController extends ChangeNotifier {
   ClaimFormVariant? get previewVariant => _previewVariant;
 
   int get minQuantity => 1;
-  int get maxQuantity =>
-      listing.quantityRemaining > 0 ? listing.quantityRemaining : 1;
+  int get maxQuantity {
+    // Maksimal 2 porsi per klaim agar makanan bisa terbagi merata
+    const int hardCap = 2;
+    final stockLimit = listing.quantityRemaining > 0 ? listing.quantityRemaining : 1;
+    return stockLimit < hardCap ? stockLimit : hardCap;
+  }
 
   /// Setiap porsi menghemat sekitar 1.4 kg jejak karbon CO2.
   double get carbonSavedKg => _quantity * 1.4;

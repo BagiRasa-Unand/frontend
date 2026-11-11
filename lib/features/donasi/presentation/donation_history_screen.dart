@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -11,6 +9,7 @@ import '../data/food_listing.dart';
 import '../data/food_listing_repository.dart';
 import '../logic/donation_history_controller.dart';
 import 'listing_detail_screen.dart';
+import 'widgets/food_photo.dart';
 import 'widgets/status_badge.dart';
 
 class DonationHistoryScreen extends StatelessWidget {
@@ -19,9 +18,8 @@ class DonationHistoryScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (context) => DonationHistoryController(
-        context.read<FoodListingRepository>(),
-      ),
+      create: (context) =>
+          DonationHistoryController(context.read<FoodListingRepository>()),
       child: const _DonationHistoryBody(),
     );
   }
@@ -55,25 +53,27 @@ class _DonationHistoryBody extends StatelessWidget {
                   if (listings.isEmpty)
                     const _EmptyHistory()
                   else
-                    ...listings.map((listing) => Padding(
-                          padding: const EdgeInsets.only(bottom: 12),
-                          child: _HistoryCard(
-                            listing: listing,
-                            now: controller.now,
-                            pickupPointName: context
-                                .read<PickupPointRepository>()
-                                .getById(listing.pickupPointId)
-                                ?.name ??
+                    ...listings.map(
+                      (listing) => Padding(
+                        padding: const EdgeInsets.only(bottom: 12),
+                        child: _HistoryCard(
+                          listing: listing,
+                          now: controller.now,
+                          pickupPointName:
+                              context
+                                  .read<PickupPointRepository>()
+                                  .getById(listing.pickupPointId)
+                                  ?.name ??
                               'Titik pengambilan',
-                            onTap: () => Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (_) => ListingDetailScreen(
-                                  listingId: listing.id,
-                                ),
-                              ),
+                          onTap: () => Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (_) =>
+                                  ListingDetailScreen(listingId: listing.id),
                             ),
                           ),
-                        )),
+                        ),
+                      ),
+                    ),
                 ]),
               ),
             ),
@@ -117,8 +117,11 @@ class _HistoryHeader extends StatelessWidget {
               color: AppColors.primaryDeep,
               shape: BoxShape.circle,
             ),
-            child: const Icon(Icons.person_outline_rounded,
-                size: 17, color: AppColors.surface),
+            child: const Icon(
+              Icons.person_outline_rounded,
+              size: 17,
+              color: AppColors.surface,
+            ),
           ),
         ],
       ),
@@ -135,37 +138,48 @@ class _StatsRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Expanded(child: _StatCard(
-          value: stats.totalSaved,
-          label: 'Porsi Berkah',
-          icon: Icons.volunteer_activism_outlined,
-          fill: AppColors.warningSoft,
-          iconColor: AppColors.warningText,
-        )),
+        Expanded(
+          child: _StatCard(
+            value: stats.totalSaved,
+            label: 'Porsi Berkah',
+            icon: Icons.volunteer_activism_outlined,
+            fill: AppColors.warningSoft,
+            iconColor: AppColors.warningText,
+          ),
+        ),
         const SizedBox(width: 10),
-        Expanded(child: _StatCard(
-          value: stats.totalListings,
-          label: 'Listing Terbit',
-          icon: Icons.inventory_2_outlined,
-          fill: AppColors.primarySoft,
-          iconColor: AppColors.primary,
-        )),
+        Expanded(
+          child: _StatCard(
+            value: stats.totalListings,
+            label: 'Listing Terbit',
+            icon: Icons.inventory_2_outlined,
+            fill: AppColors.primarySoft,
+            iconColor: AppColors.primary,
+          ),
+        ),
         const SizedBox(width: 10),
-        Expanded(child: _StatCard(
-          value: stats.expiredCount,
-          label: 'Terlewat',
-          icon: Icons.hourglass_empty_rounded,
-          fill: AppColors.dangerSoft,
-          iconColor: AppColors.danger,
-        )),
+        Expanded(
+          child: _StatCard(
+            value: stats.expiredCount,
+            label: 'Terlewat',
+            icon: Icons.hourglass_empty_rounded,
+            fill: AppColors.dangerSoft,
+            iconColor: AppColors.danger,
+          ),
+        ),
       ],
     );
   }
 }
 
 class _StatCard extends StatelessWidget {
-  const _StatCard({required this.value, required this.label, required this.icon,
-      required this.fill, required this.iconColor});
+  const _StatCard({
+    required this.value,
+    required this.label,
+    required this.icon,
+    required this.fill,
+    required this.iconColor,
+  });
 
   final int value;
   final String label;
@@ -182,7 +196,11 @@ class _StatCard extends StatelessWidget {
         color: fill,
         borderRadius: BorderRadius.circular(AppRadius.r16),
         boxShadow: const [
-          BoxShadow(color: AppColors.border, blurRadius: 0, offset: Offset(0, 3)),
+          BoxShadow(
+            color: AppColors.border,
+            blurRadius: 0,
+            offset: Offset(0, 3),
+          ),
         ],
       ),
       child: Column(
@@ -198,12 +216,19 @@ class _StatCard extends StatelessWidget {
             ),
             child: Icon(icon, size: 16, color: iconColor),
           ),
-          Text('$value', style: AppTextStyles.modalTitle.copyWith(
+          Text(
+            '$value',
+            style: AppTextStyles.modalTitle.copyWith(
               color: iconColor == AppColors.danger
                   ? AppColors.dangerDark
-                  : AppColors.brownDark)),
-          Text(label, textAlign: TextAlign.center,
-              style: AppTextStyles.badge.copyWith(fontSize: 10, color: iconColor)),
+                  : AppColors.brownDark,
+            ),
+          ),
+          Text(
+            label,
+            textAlign: TextAlign.center,
+            style: AppTextStyles.badge.copyWith(fontSize: 10, color: iconColor),
+          ),
         ],
       ),
     );
@@ -222,7 +247,11 @@ class _DonorLevelCard extends StatelessWidget {
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(AppRadius.r16),
         boxShadow: const [
-          BoxShadow(color: AppColors.border, blurRadius: 0, offset: Offset(0, 3)),
+          BoxShadow(
+            color: AppColors.border,
+            blurRadius: 0,
+            offset: Offset(0, 3),
+          ),
         ],
       ),
       child: Row(
@@ -234,8 +263,11 @@ class _DonorLevelCard extends StatelessWidget {
               color: AppColors.reward.withValues(alpha: 0.3),
               borderRadius: BorderRadius.circular(AppRadius.r12),
             ),
-            child: const Icon(Icons.emoji_events_outlined,
-                color: AppColors.amberDark, size: 19),
+            child: const Icon(
+              Icons.emoji_events_outlined,
+              color: AppColors.amberDark,
+              size: 19,
+            ),
           ),
           const SizedBox(width: 10),
           Expanded(
@@ -250,12 +282,19 @@ class _DonorLevelCard extends StatelessWidget {
                     _SmallPill(label: 'Lv. 4'),
                   ],
                 ),
-                Text('Pahlawan Pangan Teladan Kampus', style: AppTextStyles.caption.copyWith(
-                    color: AppColors.textPrimary)),
+                Text(
+                  'Pahlawan Pangan Teladan Kampus',
+                  style: AppTextStyles.caption.copyWith(
+                    color: AppColors.textPrimary,
+                  ),
+                ),
               ],
             ),
           ),
-          const Icon(Icons.chevron_right_rounded, color: AppColors.textSecondary),
+          const Icon(
+            Icons.chevron_right_rounded,
+            color: AppColors.textSecondary,
+          ),
         ],
       ),
     );
@@ -280,8 +319,15 @@ class _FilterSwitcher extends StatelessWidget {
           ),
           child: Row(
             children: [
-              _ViewPill(label: 'Daftar Donasi', icon: Icons.list_alt_rounded, selected: true),
-              _ViewPill(label: 'Pratinjau Kosong', icon: Icons.sentiment_neutral_outlined),
+              _ViewPill(
+                label: 'Daftar Donasi',
+                icon: Icons.list_alt_rounded,
+                selected: true,
+              ),
+              _ViewPill(
+                label: 'Pratinjau Kosong',
+                icon: Icons.sentiment_neutral_outlined,
+              ),
             ],
           ),
         ),
@@ -291,14 +337,26 @@ class _FilterSwitcher extends StatelessWidget {
           child: ListView(
             scrollDirection: Axis.horizontal,
             children: [
-              _HistoryFilterChip(controller: controller,
-                  value: DonationHistoryFilter.semua, label: 'Semua'),
-              _HistoryFilterChip(controller: controller,
-                  value: DonationHistoryFilter.tersedia, label: 'Tersedia'),
-              _HistoryFilterChip(controller: controller,
-                  value: DonationHistoryFilter.habisDiklaim, label: 'Habis Diklaim'),
-              _HistoryFilterChip(controller: controller,
-                  value: DonationHistoryFilter.kadaluarsa, label: 'Kadaluarsa'),
+              _HistoryFilterChip(
+                controller: controller,
+                value: DonationHistoryFilter.semua,
+                label: 'Semua',
+              ),
+              _HistoryFilterChip(
+                controller: controller,
+                value: DonationHistoryFilter.tersedia,
+                label: 'Tersedia',
+              ),
+              _HistoryFilterChip(
+                controller: controller,
+                value: DonationHistoryFilter.habisDiklaim,
+                label: 'Habis Diklaim',
+              ),
+              _HistoryFilterChip(
+                controller: controller,
+                value: DonationHistoryFilter.kadaluarsa,
+                label: 'Kadaluarsa',
+              ),
             ],
           ),
         ),
@@ -308,7 +366,11 @@ class _FilterSwitcher extends StatelessWidget {
 }
 
 class _ViewPill extends StatelessWidget {
-  const _ViewPill({required this.label, required this.icon, this.selected = false});
+  const _ViewPill({
+    required this.label,
+    required this.icon,
+    this.selected = false,
+  });
 
   final String label;
   final IconData icon;
@@ -323,17 +385,32 @@ class _ViewPill extends StatelessWidget {
           color: selected ? AppColors.surface : Colors.transparent,
           borderRadius: BorderRadius.circular(AppRadius.r12),
           boxShadow: selected
-              ? const [BoxShadow(color: AppColors.border, blurRadius: 0, offset: Offset(0, 2))]
+              ? const [
+                  BoxShadow(
+                    color: AppColors.border,
+                    blurRadius: 0,
+                    offset: Offset(0, 2),
+                  ),
+                ]
               : null,
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, size: 13,
-                color: selected ? AppColors.textPrimary : AppColors.textSecondary),
+            Icon(
+              icon,
+              size: 13,
+              color: selected ? AppColors.textPrimary : AppColors.textSecondary,
+            ),
             const SizedBox(width: 5),
-            Text(label, style: AppTextStyles.badge.copyWith(
-                color: selected ? AppColors.textPrimary : AppColors.textSecondary)),
+            Text(
+              label,
+              style: AppTextStyles.badge.copyWith(
+                color: selected
+                    ? AppColors.textPrimary
+                    : AppColors.textSecondary,
+              ),
+            ),
           ],
         ),
       ),
@@ -342,7 +419,11 @@ class _ViewPill extends StatelessWidget {
 }
 
 class _HistoryFilterChip extends StatelessWidget {
-  const _HistoryFilterChip({required this.controller, required this.value, required this.label});
+  const _HistoryFilterChip({
+    required this.controller,
+    required this.value,
+    required this.label,
+  });
 
   final DonationHistoryController controller;
   final DonationHistoryFilter value;
@@ -368,11 +449,14 @@ class _HistoryFilterChip extends StatelessWidget {
               ),
             ],
           ),
-          child: Center(child: Text(
-            '$label (${controller.countFor(value)})',
-            style: AppTextStyles.chip.copyWith(
-                color: selected ? AppColors.surface : AppColors.textSecondary),
-          )),
+          child: Center(
+            child: Text(
+              '$label (${controller.countFor(value)})',
+              style: AppTextStyles.chip.copyWith(
+                color: selected ? AppColors.surface : AppColors.textSecondary,
+              ),
+            ),
+          ),
         ),
       ),
     );
@@ -380,8 +464,12 @@ class _HistoryFilterChip extends StatelessWidget {
 }
 
 class _HistoryCard extends StatelessWidget {
-  const _HistoryCard({required this.listing, required this.now,
-      required this.pickupPointName, required this.onTap});
+  const _HistoryCard({
+    required this.listing,
+    required this.now,
+    required this.pickupPointName,
+    required this.onTap,
+  });
 
   final FoodListing listing;
   final DateTime now;
@@ -395,7 +483,9 @@ class _HistoryCard extends StatelessWidget {
     final accent = muted ? AppColors.danger : AppColors.teal;
     final progress = listing.quantityTotal == 0
         ? 0.0
-        : (listing.claimedQuantity / listing.quantityTotal).clamp(0.0, 1.0).toDouble();
+        : (listing.claimedQuantity / listing.quantityTotal)
+              .clamp(0.0, 1.0)
+              .toDouble();
 
     return Opacity(
       opacity: muted ? 0.9 : 1,
@@ -407,7 +497,11 @@ class _HistoryCard extends StatelessWidget {
             color: AppColors.surface,
             borderRadius: BorderRadius.circular(AppRadius.r20),
             boxShadow: const [
-              BoxShadow(color: AppColors.border, blurRadius: 0, offset: Offset(0, 4)),
+              BoxShadow(
+                color: AppColors.border,
+                blurRadius: 0,
+                offset: Offset(0, 4),
+              ),
             ],
           ),
           child: Column(
@@ -427,24 +521,43 @@ class _HistoryCard extends StatelessWidget {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               StatusBadge(status: status, compact: true),
-                              Flexible(child: Text(_dateText(listing.createdAt),
+                              Flexible(
+                                child: Text(
+                                  _dateText(listing.createdAt),
                                   overflow: TextOverflow.ellipsis,
-                                  style: AppTextStyles.caption)),
+                                  style: AppTextStyles.caption,
+                                ),
+                              ),
                             ],
                           ),
                           const SizedBox(height: 3),
-                          Text(listing.name, maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: AppTextStyles.cardTitle.copyWith(fontSize: 18)),
+                          Text(
+                            listing.name,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: AppTextStyles.cardTitle.copyWith(
+                              fontSize: 18,
+                            ),
+                          ),
                           const Spacer(),
                           Row(
                             children: [
-                              Icon(Icons.storefront_outlined,
-                                  size: 12, color: muted ? AppColors.danger : AppColors.primaryDeep),
+                              Icon(
+                                Icons.storefront_outlined,
+                                size: 12,
+                                color: muted
+                                    ? AppColors.danger
+                                    : AppColors.primaryDeep,
+                              ),
                               const SizedBox(width: 4),
-                                Expanded(child: Text(pickupPointName,
-                                  maxLines: 1, overflow: TextOverflow.ellipsis,
-                                  style: AppTextStyles.caption)),
+                              Expanded(
+                                child: Text(
+                                  pickupPointName,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: AppTextStyles.caption,
+                                ),
+                              ),
                             ],
                           ),
                         ],
@@ -457,7 +570,9 @@ class _HistoryCard extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: muted ? AppColors.dangerSoft.withValues(alpha: 0.7) : AppColors.creamSoft,
+                  color: muted
+                      ? AppColors.dangerSoft.withValues(alpha: 0.7)
+                      : AppColors.creamSoft,
                   borderRadius: BorderRadius.circular(AppRadius.r12),
                 ),
                 child: Column(
@@ -465,13 +580,20 @@ class _HistoryCard extends StatelessWidget {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(muted ? 'Waktu habis' : 'Distribusi Makanan',
-                            style: AppTextStyles.badge.copyWith(color: accent)),
-                        Text(muted
-                            ? '${listing.claimedQuantity} porsi terlewat'
-                            : '${listing.claimedQuantity} / ${listing.quantityTotal} porsi habis terbagi',
-                            style: AppTextStyles.badge.copyWith(
-                                color: muted ? AppColors.dangerDark : AppColors.textPrimary)),
+                        Text(
+                          muted ? 'Waktu habis' : 'Distribusi Makanan',
+                          style: AppTextStyles.badge.copyWith(color: accent),
+                        ),
+                        Text(
+                          muted
+                              ? '${listing.claimedQuantity} porsi terlewat'
+                              : '${listing.claimedQuantity} / ${listing.quantityTotal} porsi habis terbagi',
+                          style: AppTextStyles.badge.copyWith(
+                            color: muted
+                                ? AppColors.dangerDark
+                                : AppColors.textPrimary,
+                          ),
+                        ),
                       ],
                     ),
                     const SizedBox(height: 6),
@@ -504,23 +626,38 @@ class _HistoryCard extends StatelessWidget {
 
   String _dateText(DateTime date) {
     final nowDate = DateTime.now();
-    if (date.year == nowDate.year && date.month == nowDate.month && date.day == nowDate.day) {
+    if (date.year == nowDate.year &&
+        date.month == nowDate.month &&
+        date.day == nowDate.day) {
       return 'Hari ini, ${_time(date)}';
     }
     final yesterday = nowDate.subtract(const Duration(days: 1));
-    if (date.year == yesterday.year && date.month == yesterday.month && date.day == yesterday.day) {
+    if (date.year == yesterday.year &&
+        date.month == yesterday.month &&
+        date.day == yesterday.day) {
       return 'Kemarin, ${_time(date)}';
     }
     return '${date.day} ${_month(date.month)} ${date.year}';
   }
 
-  String _time(DateTime date) => '${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
+  String _time(DateTime date) =>
+      '${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
 
   String _month(int month) => const [
-        '', 'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun',
-        'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'
-      ][month];
-
+    '',
+    'Jan',
+    'Feb',
+    'Mar',
+    'Apr',
+    'Mei',
+    'Jun',
+    'Jul',
+    'Agu',
+    'Sep',
+    'Okt',
+    'Nov',
+    'Des',
+  ][month];
 }
 
 class _HistoryPhoto extends StatelessWidget {
@@ -539,12 +676,13 @@ class _HistoryPhoto extends StatelessWidget {
         child: path == null
             ? Container(
                 color: AppColors.surfaceWarm,
-                child: Icon(Icons.restaurant_rounded,
-                    size: 30, color: muted ? AppColors.slate : AppColors.primary),
+                child: Icon(
+                  Icons.restaurant_rounded,
+                  size: 30,
+                  color: muted ? AppColors.slate : AppColors.primary,
+                ),
               )
-            : path!.startsWith('assets/')
-                ? Image.asset(path!, fit: BoxFit.cover)
-                : Image.file(File(path!), fit: BoxFit.cover),
+            : buildFoodPhoto(path!),
       ),
     );
   }
@@ -563,8 +701,13 @@ class _SmallPill extends StatelessWidget {
         color: AppColors.primarySoft,
         borderRadius: BorderRadius.circular(AppRadius.r9999),
       ),
-      child: Text(label, style: AppTextStyles.badge.copyWith(
-          fontSize: 10, color: AppColors.primaryDeep)),
+      child: Text(
+        label,
+        style: AppTextStyles.badge.copyWith(
+          fontSize: 10,
+          color: AppColors.primaryDeep,
+        ),
+      ),
     );
   }
 }
@@ -580,11 +723,17 @@ class _EmptyHistory extends StatelessWidget {
         children: [
           Image.asset('assets/images/rasi_empty.png', width: 132, height: 132),
           const SizedBox(height: 16),
-          Text('Belum ada donasi di sini', style: AppTextStyles.heading,
-              textAlign: TextAlign.center),
+          Text(
+            'Belum ada donasi di sini',
+            style: AppTextStyles.heading,
+            textAlign: TextAlign.center,
+          ),
           const SizedBox(height: 6),
-          Text('Listing donasimu akan muncul di halaman ini setelah dibuat.',
-              style: AppTextStyles.caption, textAlign: TextAlign.center),
+          Text(
+            'Listing donasimu akan muncul di halaman ini setelah dibuat.',
+            style: AppTextStyles.caption,
+            textAlign: TextAlign.center,
+          ),
         ],
       ),
     );

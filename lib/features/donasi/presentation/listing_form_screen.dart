@@ -1,5 +1,6 @@
-import 'dart:io';
+import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
@@ -13,6 +14,7 @@ import '../../lokasi/presentation/pickup_point_form_screen.dart';
 import '../data/food_listing.dart';
 import '../data/food_listing_repository.dart';
 import '../logic/listing_form_controller.dart';
+import 'widgets/food_photo.dart';
 import 'widgets/photo_source_sheet.dart';
 
 class ListingFormScreen extends StatelessWidget {
@@ -48,7 +50,9 @@ class _ListingFormBodyState extends State<_ListingFormBody> {
     _nameController = TextEditingController(text: controller.name)
       ..addListener(() => controller.setName(_nameController.text));
     _descriptionController = TextEditingController(text: controller.description)
-      ..addListener(() => controller.setDescription(_descriptionController.text));
+      ..addListener(
+        () => controller.setDescription(_descriptionController.text),
+      );
   }
 
   @override
@@ -59,6 +63,7 @@ class _ListingFormBodyState extends State<_ListingFormBody> {
   }
 
   Future<void> _pickPhoto(ImageSource source) async {
+    final controller = context.read<ListingFormController>();
     try {
       final picked = await _imagePicker.pickImage(
         source: source,
@@ -66,15 +71,44 @@ class _ListingFormBodyState extends State<_ListingFormBody> {
         maxHeight: 1600,
         imageQuality: 85,
       );
-      if (picked != null && mounted) {
-        context.read<ListingFormController>().setPhotoPath(picked.path);
+      if (picked == null || !mounted) return;
+
+      final fileSize = await picked.length();
+      if (fileSize > 5 * 1024 * 1024) {
+        _showPhotoError('Ukuran foto maksimal 5 MB.');
+        return;
       }
+
+      final extension = picked.name.split('.').last.toLowerCase();
+      final mimeType = picked.mimeType?.toLowerCase();
+      final isSupported =
+          extension == 'jpg' ||
+          extension == 'jpeg' ||
+          extension == 'png' ||
+          mimeType == 'image/jpeg' ||
+          mimeType == 'image/png';
+      if (!isSupported) {
+        _showPhotoError('Format foto harus JPG atau PNG.');
+        return;
+      }
+
+      final photoPath = kIsWeb
+          ? 'data:${mimeType ?? 'image/jpeg'};base64,${base64Encode(await picked.readAsBytes())}'
+          : picked.path;
+      controller.setPhotoPath(photoPath);
     } catch (_) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Tidak bisa mengakses kamera')),
+      _showPhotoError(
+        source == ImageSource.camera
+            ? 'Tidak bisa mengakses kamera.'
+            : 'Tidak bisa membuka galeri.',
       );
     }
+  }
+
+  void _showPhotoError(String message) {
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(message)));
   }
 
   Future<void> _showPhotoSourceSheet() async {
@@ -86,7 +120,8 @@ class _ListingFormBodyState extends State<_ListingFormBody> {
 
   Future<void> _pickDeadline() async {
     final controller = context.read<ListingFormController>();
-    final current = controller.expiresAt ?? DateTime.now().add(const Duration(hours: 1));
+    final current =
+        controller.expiresAt ?? DateTime.now().add(const Duration(hours: 1));
     final date = await showDatePicker(
       context: context,
       initialDate: current.isBefore(DateTime.now()) ? DateTime.now() : current,
@@ -103,13 +138,9 @@ class _ListingFormBodyState extends State<_ListingFormBody> {
     );
     if (time == null || !mounted) return;
 
-    controller.setExpiresAt(DateTime(
-      date.year,
-      date.month,
-      date.day,
-      time.hour,
-      time.minute,
-    ));
+    controller.setExpiresAt(
+      DateTime(date.year, date.month, date.day, time.hour, time.minute),
+    );
   }
 
   Theme _pickerTheme(BuildContext context, Widget? child) {
@@ -134,15 +165,12 @@ class _ListingFormBodyState extends State<_ListingFormBody> {
     final messenger = ScaffoldMessenger.of(context);
     controller.save(repository);
     Navigator.of(context).pop();
-    messenger.showSnackBar(
-      const SnackBar(content: Text('Listing disimpan')),
-    );
+    messenger.showSnackBar(const SnackBar(content: Text('Listing disimpan')));
   }
 
   Future<void> _openPickupPointForm() async {
-    await Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => const PickupPointFormScreen()),
-    );
+    await Navigator.of(context)
+        .push(MaterialPageRoute(builder: (_) => const PickupPointFormScreen()));
   }
 
   @override
@@ -166,9 +194,7 @@ class _ListingFormBodyState extends State<_ListingFormBody> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const _ModeSwitcher(),
-                    const SizedBox(height: 8),
-                    _FormMeta(isEdit: isEdit),
+                    const _FormMeta(),
                     const SizedBox(height: 16),
                     _PhotoField(
                       photoPath: controller.photoPath,
@@ -183,8 +209,11 @@ class _ListingFormBodyState extends State<_ListingFormBody> {
                       errorText: controller.nameError,
                     ),
                     const SizedBox(height: 18),
-                    _FieldLabel(label: 'Jenis Makanan', required: true,
-                        trailing: 'Pilih satu kategori'),
+                    _FieldLabel(
+                      label: 'Jenis Makanan',
+                      required: true,
+                      trailing: 'Pilih satu kategori',
+                    ),
                     const SizedBox(height: 8),
                     _FoodTypeGrid(controller: controller),
                     if (controller.foodTypeError != null)
@@ -192,7 +221,10 @@ class _ListingFormBodyState extends State<_ListingFormBody> {
                     const SizedBox(height: 18),
                     _QuantityField(controller: controller),
                     const SizedBox(height: 18),
-                    _FieldLabel(label: 'Batas Waktu Pengambilan', required: true),
+                    _FieldLabel(
+                      label: 'Batas Waktu Pengambilan',
+                      required: true,
+                    ),
                     const SizedBox(height: 4),
                     _DeadlineField(
                       value: controller.expiresAt,
@@ -206,7 +238,10 @@ class _ListingFormBodyState extends State<_ListingFormBody> {
                       onAdd: _openPickupPointForm,
                     ),
                     const SizedBox(height: 18),
-                    _FieldLabel(label: 'Catatan Tambahan', trailing: '(Opsional)'),
+                    _FieldLabel(
+                      label: 'Catatan Tambahan',
+                      trailing: '(Opsional)',
+                    ),
                     const SizedBox(height: 4),
                     TextField(
                       controller: _descriptionController,
@@ -221,10 +256,15 @@ class _ListingFormBodyState extends State<_ListingFormBody> {
                     const _TipCard(),
                     const SizedBox(height: 18),
                     ChunkyButton(
-                      label: isEdit ? 'SIMPAN PERUBAHAN' : 'SIMPAN & BAGIKAN DONASI',
+                      label: isEdit
+                          ? 'SIMPAN PERUBAHAN'
+                          : 'SIMPAN & BAGIKAN DONASI',
                       onTap: _save,
-                      icon: const Icon(Icons.volunteer_activism_outlined,
-                          size: 18, color: AppColors.surface),
+                      icon: const Icon(
+                        Icons.volunteer_activism_outlined,
+                        size: 18,
+                        color: AppColors.surface,
+                      ),
                       height: 56,
                       borderRadius: AppRadius.r16,
                     ),
@@ -235,8 +275,11 @@ class _ListingFormBodyState extends State<_ListingFormBody> {
                       variant: ChunkyButtonVariant.neutral,
                       shadowColor: AppColors.border,
                       textColor: AppColors.textPrimary,
-                      icon: const Icon(Icons.close_rounded,
-                          size: 15, color: AppColors.textSecondary),
+                      icon: const Icon(
+                        Icons.close_rounded,
+                        size: 15,
+                        color: AppColors.textSecondary,
+                      ),
                       height: 48,
                       borderRadius: AppRadius.r16,
                     ),
@@ -265,12 +308,19 @@ class _FormHeader extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.background.withValues(alpha: 0.96),
         boxShadow: const [
-          BoxShadow(color: AppColors.border, blurRadius: 8, offset: Offset(0, 1)),
+          BoxShadow(
+            color: AppColors.border,
+            blurRadius: 8,
+            offset: Offset(0, 1),
+          ),
         ],
       ),
       child: Row(
         children: [
-          IconButton(onPressed: onBack, icon: const Icon(Icons.arrow_back_rounded)),
+          IconButton(
+            onPressed: onBack,
+            icon: const Icon(Icons.arrow_back_rounded),
+          ),
           const SizedBox(width: 4),
           Expanded(child: Text(title, style: AppTextStyles.heading)),
           Container(
@@ -280,8 +330,11 @@ class _FormHeader extends StatelessWidget {
               color: AppColors.primaryDeep,
               shape: BoxShape.circle,
             ),
-            child: const Icon(Icons.person_outline_rounded,
-                size: 17, color: AppColors.surface),
+            child: const Icon(
+              Icons.person_outline_rounded,
+              size: 17,
+              color: AppColors.surface,
+            ),
           ),
         ],
       ),
@@ -289,69 +342,8 @@ class _FormHeader extends StatelessWidget {
   }
 }
 
-class _ModeSwitcher extends StatelessWidget {
-  const _ModeSwitcher();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 40,
-      padding: const EdgeInsets.all(6),
-      decoration: BoxDecoration(
-        color: AppColors.pillNeutral,
-        borderRadius: BorderRadius.circular(AppRadius.r9999),
-      ),
-      child: Row(
-        children: [
-          _ModePill(label: 'Buat Baru', icon: Icons.add_circle_outline,
-              selected: true),
-          _ModePill(label: 'Ubah Data', icon: Icons.edit_note_outlined),
-          _ModePill(label: 'Error Mode', icon: Icons.error_outline_rounded),
-        ],
-      ),
-    );
-  }
-}
-
-class _ModePill extends StatelessWidget {
-  const _ModePill({required this.label, required this.icon, this.selected = false});
-
-  final String label;
-  final IconData icon;
-  final bool selected;
-
-  @override
-  Widget build(BuildContext context) {
-    return Expanded(
-      child: Container(
-        height: 28,
-        decoration: BoxDecoration(
-          color: selected ? AppColors.surface : Colors.transparent,
-          borderRadius: BorderRadius.circular(AppRadius.r9999),
-          boxShadow: selected
-              ? const [BoxShadow(color: AppColors.border, blurRadius: 2)]
-              : null,
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icon, size: 14,
-                color: selected ? AppColors.primary : AppColors.textSecondary),
-            const SizedBox(width: 4),
-            Flexible(child: Text(label, overflow: TextOverflow.ellipsis,
-                style: AppTextStyles.badge.copyWith(
-                    color: selected ? AppColors.textPrimary : AppColors.textSecondary))),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
 class _FormMeta extends StatelessWidget {
-  const _FormMeta({required this.isEdit});
-
-  final bool isEdit;
+  const _FormMeta();
 
   @override
   Widget build(BuildContext context) {
@@ -364,35 +356,31 @@ class _FormMeta extends StatelessWidget {
             color: AppColors.tealDeep,
             borderRadius: BorderRadius.circular(AppRadius.r9999),
             boxShadow: const [
-              BoxShadow(color: AppColors.tealDark, blurRadius: 0, offset: Offset(0, 2)),
+              BoxShadow(
+                color: AppColors.tealDark,
+                blurRadius: 0,
+                offset: Offset(0, 2),
+              ),
             ],
           ),
           child: Row(
             children: [
-              const Icon(Icons.volunteer_activism_outlined,
-                  size: 14, color: AppColors.surface),
+              const Icon(
+                Icons.volunteer_activism_outlined,
+                size: 14,
+                color: AppColors.surface,
+              ),
               const SizedBox(width: 4),
-              Text('DONASI MAKANAN', style: AppTextStyles.badge.copyWith(
-                  color: AppColors.surface, letterSpacing: 0.55)),
+              Text(
+                'DONASI MAKANAN',
+                style: AppTextStyles.badge.copyWith(
+                  color: AppColors.surface,
+                  letterSpacing: 0.55,
+                ),
+              ),
             ],
           ),
         ),
-        const SizedBox(width: 8),
-        Container(
-          height: 36,
-          padding: const EdgeInsets.symmetric(horizontal: 10),
-          decoration: BoxDecoration(
-            color: AppColors.primarySoft,
-            borderRadius: BorderRadius.circular(AppRadius.r9999),
-          ),
-          child: Text(isEdit ? 'Mode Edit' : 'Mode Baru',
-              style: AppTextStyles.badge.copyWith(color: AppColors.primaryDark)),
-        ),
-        const Spacer(),
-        const Icon(Icons.verified_outlined, size: 14, color: AppColors.tealDeep),
-        const SizedBox(width: 3),
-        Text('Akun Mitra\nTerverifikasi', style: AppTextStyles.badge.copyWith(
-            color: AppColors.textSecondary)),
       ],
     );
   }
@@ -429,7 +417,11 @@ class _PhotoField extends StatelessWidget {
                 color: AppColors.surface,
                 borderRadius: BorderRadius.circular(AppRadius.r16),
                 boxShadow: const [
-                  BoxShadow(color: AppColors.border, blurRadius: 0, offset: Offset(0, 3)),
+                  BoxShadow(
+                    color: AppColors.border,
+                    blurRadius: 0,
+                    offset: Offset(0, 3),
+                  ),
                 ],
               ),
               child: photoPath == null
@@ -443,23 +435,40 @@ class _PhotoField extends StatelessWidget {
                             color: AppColors.primarySoft,
                             shape: BoxShape.circle,
                           ),
-                          child: const Icon(Icons.camera_alt_outlined,
-                              size: 24, color: AppColors.primary),
+                          child: const Icon(
+                            Icons.camera_alt_outlined,
+                            size: 24,
+                            color: AppColors.primary,
+                          ),
                         ),
                         const SizedBox(height: 8),
-                        Text('Ambil foto makanan', style: AppTextStyles.heading),
+                        Text(
+                          'Ambil foto makanan',
+                          style: AppTextStyles.heading,
+                        ),
                         const SizedBox(height: 2),
-                        Text('Atau pilih dari galeri ponselmu (Maks. 5 MB)',
-                            style: AppTextStyles.caption),
+                        Text(
+                          'Atau pilih dari galeri ponselmu (Maks. 5 MB)',
+                          style: AppTextStyles.caption,
+                        ),
                         const SizedBox(height: 8),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 4,
+                          ),
                           decoration: BoxDecoration(
                             color: AppColors.surfaceWarm,
-                            borderRadius: BorderRadius.circular(AppRadius.r9999),
+                            borderRadius: BorderRadius.circular(
+                              AppRadius.r9999,
+                            ),
                           ),
-                          child: Text('Membantu menarik minat penyelamat pangan',
-                              style: AppTextStyles.badge.copyWith(color: AppColors.brownMid)),
+                          child: Text(
+                            'Membantu menarik minat penyelamat pangan',
+                            style: AppTextStyles.badge.copyWith(
+                              color: AppColors.brownMid,
+                            ),
+                          ),
                         ),
                       ],
                     )
@@ -475,12 +484,12 @@ class _PhotoField extends StatelessWidget {
   }
 
   Widget _photoPreview(String path) {
-    if (path.startsWith('assets/')) {
-      return Image.asset(path, fit: BoxFit.cover, width: double.infinity,
-          height: double.infinity);
-    }
-    return Image.file(File(path), fit: BoxFit.cover, width: double.infinity,
-        height: double.infinity);
+    return buildFoodPhoto(
+      path,
+      fit: BoxFit.cover,
+      width: double.infinity,
+      height: double.infinity,
+    );
   }
 }
 
@@ -507,8 +516,9 @@ class _FoodTypeGrid extends StatelessWidget {
             decoration: BoxDecoration(
               color: selected ? AppColors.primarySoft : AppColors.surface,
               border: Border.all(
-                  color: selected ? AppColors.primary : AppColors.border,
-                  width: 2),
+                color: selected ? AppColors.primary : AppColors.border,
+                width: 2,
+              ),
               borderRadius: BorderRadius.circular(AppRadius.r16),
               boxShadow: [
                 BoxShadow(
@@ -520,19 +530,31 @@ class _FoodTypeGrid extends StatelessWidget {
             ),
             child: Row(
               children: [
-                Icon(_foodTypeIcon(type), size: 18,
-                    color: selected ? AppColors.primary : AppColors.tealDeep),
+                Icon(
+                  _foodTypeIcon(type),
+                  size: 18,
+                  color: selected ? AppColors.primary : AppColors.tealDeep,
+                ),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(_foodTypeLabel(type), style: AppTextStyles.badge.copyWith(
-                          color: selected ? AppColors.primaryDark : AppColors.textPrimary)),
-                      Text(_foodTypeHint(type), maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: AppTextStyles.caption.copyWith(fontSize: 11)),
+                      Text(
+                        _foodTypeLabel(type),
+                        style: AppTextStyles.badge.copyWith(
+                          color: selected
+                              ? AppColors.primaryDark
+                              : AppColors.textPrimary,
+                        ),
+                      ),
+                      Text(
+                        _foodTypeHint(type),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppTextStyles.caption.copyWith(fontSize: 11),
+                      ),
                     ],
                   ),
                 ),
@@ -545,25 +567,25 @@ class _FoodTypeGrid extends StatelessWidget {
   }
 
   IconData _foodTypeIcon(FoodType type) => switch (type) {
-        FoodType.makananBerat => Icons.lunch_dining_outlined,
-        FoodType.camilan => Icons.bakery_dining_outlined,
-        FoodType.minuman => Icons.local_cafe_outlined,
-        FoodType.lainnya => Icons.category_outlined,
-      };
+    FoodType.makananBerat => Icons.lunch_dining_outlined,
+    FoodType.camilan => Icons.bakery_dining_outlined,
+    FoodType.minuman => Icons.local_cafe_outlined,
+    FoodType.lainnya => Icons.category_outlined,
+  };
 
   String _foodTypeLabel(FoodType type) => switch (type) {
-        FoodType.makananBerat => 'Makanan Berat',
-        FoodType.camilan => 'Camilan / Roti',
-        FoodType.minuman => 'Minuman',
-        FoodType.lainnya => 'Lainnya',
-      };
+    FoodType.makananBerat => 'Makanan Berat',
+    FoodType.camilan => 'Camilan / Roti',
+    FoodType.minuman => 'Minuman',
+    FoodType.lainnya => 'Lainnya',
+  };
 
   String _foodTypeHint(FoodType type) => switch (type) {
-        FoodType.makananBerat => 'Nasi, lauk, mie',
-        FoodType.camilan => 'Kue, gorengan',
-        FoodType.minuman => 'Jus, teh, kopi',
-        FoodType.lainnya => 'Bahan segar, buah',
-      };
+    FoodType.makananBerat => 'Nasi, lauk, mie',
+    FoodType.camilan => 'Kue, gorengan',
+    FoodType.minuman => 'Jus, teh, kopi',
+    FoodType.lainnya => 'Bahan segar, buah',
+  };
 }
 
 class _QuantityField extends StatelessWidget {
@@ -577,11 +599,19 @@ class _QuantityField extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: AppColors.surface,
-        border: Border.all(color: controller.quantityError == null
-            ? AppColors.border : AppColors.error, width: 2),
+        border: Border.all(
+          color: controller.quantityError == null
+              ? AppColors.border
+              : AppColors.error,
+          width: 2,
+        ),
         borderRadius: BorderRadius.circular(AppRadius.r16),
         boxShadow: const [
-          BoxShadow(color: AppColors.border, blurRadius: 0, offset: Offset(0, 3)),
+          BoxShadow(
+            color: AppColors.border,
+            blurRadius: 0,
+            offset: Offset(0, 3),
+          ),
         ],
       ),
       child: Column(
@@ -593,26 +623,45 @@ class _QuantityField extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _FieldLabel(label: 'Jumlah Porsi', required: true),
-                  Text('Tersedia untuk dibagikan', style: AppTextStyles.caption),
+                  Text(
+                    'Tersedia untuk dibagikan',
+                    style: AppTextStyles.caption,
+                  ),
                 ],
               ),
               Row(
                 children: [
-                  _StepperButton(icon: Icons.remove, onTap: controller.decreaseQuantity,
-                      enabled: controller.quantityTotal > controller.minimumQuantity),
+                  _StepperButton(
+                    icon: Icons.remove,
+                    onTap: controller.decreaseQuantity,
+                    enabled:
+                        controller.quantityTotal > controller.minimumQuantity,
+                  ),
                   SizedBox(
                     width: 56,
                     child: Column(
                       children: [
-                        Text('${controller.quantityTotal}', style: AppTextStyles.modalTitle.copyWith(
-                            color: AppColors.primaryDark)),
-                        Text('porsi', style: AppTextStyles.badge.copyWith(
-                            color: AppColors.textSecondary)),
+                        Text(
+                          '${controller.quantityTotal}',
+                          style: AppTextStyles.modalTitle.copyWith(
+                            color: AppColors.primaryDark,
+                          ),
+                        ),
+                        Text(
+                          'porsi',
+                          style: AppTextStyles.badge.copyWith(
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
                       ],
                     ),
                   ),
-                  _StepperButton(icon: Icons.add, onTap: controller.increaseQuantity,
-                      enabled: controller.quantityTotal < 999, primary: true),
+                  _StepperButton(
+                    icon: Icons.add,
+                    onTap: controller.increaseQuantity,
+                    enabled: controller.quantityTotal < 999,
+                    primary: true,
+                  ),
                 ],
               ),
             ],
@@ -622,15 +671,22 @@ class _QuantityField extends StatelessWidget {
           const SizedBox(height: 8),
           Row(
             children: [
-              const Icon(Icons.favorite_border_rounded,
-                  size: 17, color: AppColors.tealDeep),
+              const Icon(
+                Icons.favorite_border_rounded,
+                size: 17,
+                color: AppColors.tealDeep,
+              ),
               const SizedBox(width: 6),
-              Expanded(child: Text(
-                controller.isEdit && controller.claimedQuantity > 0
-                    ? '${controller.claimedQuantity} porsi sudah diklaim'
-                    : 'Setiap porsi sangat berharga untuk teman kampusmu.',
-                style: AppTextStyles.caption.copyWith(color: AppColors.tealDeep),
-              )),
+              Expanded(
+                child: Text(
+                  controller.isEdit && controller.claimedQuantity > 0
+                      ? '${controller.claimedQuantity} porsi sudah diklaim'
+                      : 'Setiap porsi sangat berharga untuk teman kampusmu.',
+                  style: AppTextStyles.caption.copyWith(
+                    color: AppColors.tealDeep,
+                  ),
+                ),
+              ),
             ],
           ),
           if (controller.quantityError != null)
@@ -642,8 +698,12 @@ class _QuantityField extends StatelessWidget {
 }
 
 class _StepperButton extends StatelessWidget {
-  const _StepperButton({required this.icon, required this.onTap,
-      required this.enabled, this.primary = false});
+  const _StepperButton({
+    required this.icon,
+    required this.onTap,
+    required this.enabled,
+    this.primary = false,
+  });
 
   final IconData icon;
   final VoidCallback onTap;
@@ -668,14 +728,21 @@ class _StepperButton extends StatelessWidget {
             ),
           ],
         ),
-        child: Icon(icon, color: primary ? AppColors.surface : AppColors.textPrimary),
+        child: Icon(
+          icon,
+          color: primary ? AppColors.surface : AppColors.textPrimary,
+        ),
       ),
     );
   }
 }
 
 class _DeadlineField extends StatelessWidget {
-  const _DeadlineField({required this.value, required this.errorText, required this.onTap});
+  const _DeadlineField({
+    required this.value,
+    required this.errorText,
+    required this.onTap,
+  });
 
   final DateTime? value;
   final String? errorText;
@@ -693,21 +760,36 @@ class _DeadlineField extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 14),
             decoration: BoxDecoration(
               color: AppColors.surface,
-              border: Border.all(color: errorText == null ? AppColors.border : AppColors.error,
-                  width: 2),
+              border: Border.all(
+                color: errorText == null ? AppColors.border : AppColors.error,
+                width: 2,
+              ),
               borderRadius: BorderRadius.circular(AppRadius.r16),
               boxShadow: const [
-                BoxShadow(color: AppColors.border, blurRadius: 0, offset: Offset(0, 3)),
+                BoxShadow(
+                  color: AppColors.border,
+                  blurRadius: 0,
+                  offset: Offset(0, 3),
+                ),
               ],
             ),
             child: Row(
               children: [
                 const Icon(Icons.schedule_outlined, color: AppColors.tealDeep),
                 const SizedBox(width: 12),
-                Expanded(child: Text(_format(value), style: AppTextStyles.body.copyWith(
-                    fontWeight: FontWeight.w700))),
-                const Icon(Icons.calendar_month_outlined,
-                    color: AppColors.textSecondary, size: 20),
+                Expanded(
+                  child: Text(
+                    _format(value),
+                    style: AppTextStyles.body.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+                const Icon(
+                  Icons.calendar_month_outlined,
+                  color: AppColors.textSecondary,
+                  size: 20,
+                ),
               ],
             ),
           ),
@@ -719,14 +801,20 @@ class _DeadlineField extends StatelessWidget {
 
   String _format(DateTime? value) {
     if (value == null) return 'Pilih batas waktu pengambilan';
-    final date = '${value.day.toString().padLeft(2, '0')}/${value.month.toString().padLeft(2, '0')}/${value.year}';
-    final time = '${value.hour.toString().padLeft(2, '0')}.${value.minute.toString().padLeft(2, '0')} WIB';
+    final date =
+        '${value.day.toString().padLeft(2, '0')}/${value.month.toString().padLeft(2, '0')}/${value.year}';
+    final time =
+        '${value.hour.toString().padLeft(2, '0')}.${value.minute.toString().padLeft(2, '0')} WIB';
     return '$date, $time';
   }
 }
 
 class _PickupPointField extends StatelessWidget {
-  const _PickupPointField({required this.controller, required this.pickupPoints, required this.onAdd});
+  const _PickupPointField({
+    required this.controller,
+    required this.pickupPoints,
+    required this.onAdd,
+  });
 
   final ListingFormController controller;
   final List<dynamic> pickupPoints;
@@ -745,11 +833,18 @@ class _PickupPointField extends StatelessWidget {
               onTap: onAdd,
               child: Row(
                 children: [
-                  const Icon(Icons.add_location_alt_outlined,
-                      size: 15, color: AppColors.tealDeep),
+                  const Icon(
+                    Icons.add_location_alt_outlined,
+                    size: 15,
+                    color: AppColors.tealDeep,
+                  ),
                   const SizedBox(width: 2),
-                  Text('+ Tambah titik baru', style: AppTextStyles.badge.copyWith(
-                      color: AppColors.tealDeep)),
+                  Text(
+                    '+ Tambah titik baru',
+                    style: AppTextStyles.badge.copyWith(
+                      color: AppColors.tealDeep,
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -764,8 +859,10 @@ class _PickupPointField extends StatelessWidget {
               borderRadius: BorderRadius.circular(AppRadius.r16),
               border: Border.all(color: AppColors.border, width: 2),
             ),
-            child: Text('Belum ada titik pengambilan. Tambahkan titik baru.',
-                style: AppTextStyles.caption),
+            child: Text(
+              'Belum ada titik pengambilan. Tambahkan titik baru.',
+              style: AppTextStyles.caption,
+            ),
           )
         else
           DropdownButtonFormField<String>(
@@ -779,7 +876,10 @@ class _PickupPointField extends StatelessWidget {
             items: pickupPoints.map<DropdownMenuItem<String>>((point) {
               return DropdownMenuItem<String>(
                 value: point.id as String,
-                child: Text(point.name as String, overflow: TextOverflow.ellipsis),
+                child: Text(
+                  point.name as String,
+                  overflow: TextOverflow.ellipsis,
+                ),
               );
             }).toList(),
             onChanged: controller.setPickupPoint,
@@ -787,8 +887,10 @@ class _PickupPointField extends StatelessWidget {
         if (pickupPoints.isNotEmpty)
           Padding(
             padding: const EdgeInsets.only(top: 6),
-            child: Text('Lokasi yang mudah diakses mahasiswa saat pergantian jam kuliah.',
-                style: AppTextStyles.caption),
+            child: Text(
+              'Lokasi yang mudah diakses mahasiswa saat pergantian jam kuliah.',
+              style: AppTextStyles.caption,
+            ),
           ),
       ],
     );
@@ -807,7 +909,11 @@ class _TipCard extends StatelessWidget {
         border: Border.all(color: AppColors.border, width: 2),
         borderRadius: BorderRadius.circular(AppRadius.r16),
         boxShadow: const [
-          BoxShadow(color: AppColors.border, blurRadius: 0, offset: Offset(0, 3)),
+          BoxShadow(
+            color: AppColors.border,
+            blurRadius: 0,
+            offset: Offset(0, 3),
+          ),
         ],
       ),
       child: Row(
@@ -828,8 +934,10 @@ class _TipCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text('Pesan Sahabat Rasi', style: AppTextStyles.body),
-                Text('"Pastikan makanan masih higienis dan layak konsumsi ya! Kamu baru saja menyelamatkan bumi hari ini."',
-                    style: AppTextStyles.caption),
+                Text(
+                  '"Pastikan makanan masih higienis dan layak konsumsi ya! Kamu baru saja menyelamatkan bumi hari ini."',
+                  style: AppTextStyles.caption,
+                ),
               ],
             ),
           ),
@@ -840,7 +948,11 @@ class _TipCard extends StatelessWidget {
 }
 
 class _FieldLabel extends StatelessWidget {
-  const _FieldLabel({required this.label, this.required = false, this.trailing});
+  const _FieldLabel({
+    required this.label,
+    this.required = false,
+    this.trailing,
+  });
 
   final String label;
   final bool required;
@@ -851,13 +963,20 @@ class _FieldLabel extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text.rich(TextSpan(
-          text: label,
-          style: AppTextStyles.body.copyWith(fontWeight: FontWeight.w700),
-          children: required
-              ? [const TextSpan(text: ' *', style: TextStyle(color: AppColors.error))]
-              : null,
-        )),
+        Text.rich(
+          TextSpan(
+            text: label,
+            style: AppTextStyles.body.copyWith(fontWeight: FontWeight.w700),
+            children: required
+                ? [
+                    const TextSpan(
+                      text: ' *',
+                      style: TextStyle(color: AppColors.error),
+                    ),
+                  ]
+                : null,
+          ),
+        ),
         if (trailing != null) Text(trailing!, style: AppTextStyles.caption),
       ],
     );
@@ -865,7 +984,11 @@ class _FieldLabel extends StatelessWidget {
 }
 
 class _TextField extends StatelessWidget {
-  const _TextField({required this.controller, required this.hintText, this.errorText});
+  const _TextField({
+    required this.controller,
+    required this.hintText,
+    this.errorText,
+  });
 
   final TextEditingController controller;
   final String hintText;
@@ -890,7 +1013,10 @@ class _ErrorText extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(left: 4, top: 4),
-      child: Text(message, style: AppTextStyles.caption.copyWith(color: AppColors.error)),
+      child: Text(
+        message,
+        style: AppTextStyles.caption.copyWith(color: AppColors.error),
+      ),
     );
   }
 }
@@ -910,14 +1036,17 @@ InputDecoration _inputDecoration({
   return InputDecoration(
     hintText: hintText,
     hintStyle: AppTextStyles.body.copyWith(color: AppColors.slate),
-    prefixIcon: prefixIcon == null ? null : Icon(prefixIcon, color: AppColors.primary),
+    prefixIcon: prefixIcon == null
+        ? null
+        : Icon(prefixIcon, color: AppColors.primary),
     filled: true,
     fillColor: AppColors.surface,
     contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
     border: border,
     enabledBorder: border,
     focusedBorder: border.copyWith(
-        borderSide: const BorderSide(color: AppColors.primary, width: 2)),
+      borderSide: const BorderSide(color: AppColors.primary, width: 2),
+    ),
     errorText: errorText,
     errorStyle: AppTextStyles.caption.copyWith(color: AppColors.error),
   );
@@ -942,8 +1071,13 @@ class _DashedBorderPainter extends CustomPainter {
     for (final metric in metrics) {
       var distance = 0.0;
       while (distance < metric.length) {
-        path.addPath(metric.extractPath(distance,
-            (distance + dash).clamp(0, metric.length)), Offset.zero);
+        path.addPath(
+          metric.extractPath(
+            distance,
+            (distance + dash).clamp(0, metric.length),
+          ),
+          Offset.zero,
+        );
         distance += dash + gap;
       }
     }

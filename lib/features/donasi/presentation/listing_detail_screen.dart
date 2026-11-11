@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
@@ -15,6 +13,7 @@ import '../../lokasi/data/pickup_point_repository.dart';
 import '../data/food_listing.dart';
 import '../data/food_listing_repository.dart';
 import '../logic/listing_detail_controller.dart';
+import 'widgets/food_photo.dart';
 import '../../lokasi/presentation/route_screen.dart';
 import 'delete_listing_sheet.dart';
 import 'listing_form_screen.dart';
@@ -62,7 +61,8 @@ class _ListingDetailBody extends StatelessWidget {
     final point = controller.pickupPoint;
     final status = listing.statusAt(controller.now);
     final isOwner = showOwnerActions && listing.donorId == kCurrentUserId;
-    final isClosed = status == ListingStatus.habisDiklaim ||
+    final isClosed =
+        status == ListingStatus.habisDiklaim ||
         status == ListingStatus.kadaluarsa;
 
     return Scaffold(
@@ -110,7 +110,9 @@ class _ListingDetailBody extends StatelessWidget {
         isOwner: isOwner,
         isClosed: isClosed,
         onEdit: () => Navigator.of(context).push(
-          MaterialPageRoute(builder: (_) => ListingFormScreen(listing: listing)),
+          MaterialPageRoute(
+            builder: (_) => ListingFormScreen(listing: listing),
+          ),
         ),
         onDelete: () => showDeleteListingSheet(context, listing),
         onClaim: () => _showClaimStub(context),
@@ -119,9 +121,9 @@ class _ListingDetailBody extends StatelessWidget {
   }
 
   void _showShareMessage(BuildContext context) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Fitur ini belum tersedia')),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('Fitur ini belum tersedia')));
   }
 
   void _showClaimStub(BuildContext context) {
@@ -130,7 +132,6 @@ class _ListingDetailBody extends StatelessWidget {
       showClaimSheet(context, listing);
     }
   }
-
 }
 
 class _DetailHeader extends StatelessWidget {
@@ -147,7 +148,10 @@ class _DetailHeader extends StatelessWidget {
       color: AppColors.background.withValues(alpha: 0.96),
       child: Row(
         children: [
-          IconButton(onPressed: onBack, icon: const Icon(Icons.arrow_back_rounded)),
+          IconButton(
+            onPressed: onBack,
+            icon: const Icon(Icons.arrow_back_rounded),
+          ),
           const SizedBox(width: 4),
           Expanded(child: Text('Detail Listing', style: AppTextStyles.heading)),
           IconButton(
@@ -162,8 +166,11 @@ class _DetailHeader extends StatelessWidget {
               color: AppColors.primaryDeep,
               shape: BoxShape.circle,
             ),
-            child: const Icon(Icons.person_outline_rounded,
-                color: AppColors.surface, size: 17),
+            child: const Icon(
+              Icons.person_outline_rounded,
+              color: AppColors.surface,
+              size: 17,
+            ),
           ),
         ],
       ),
@@ -187,9 +194,16 @@ class _PreviewSwitcher extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  const Icon(Icons.tune_rounded, size: 13, color: AppColors.primary),
+                  const Icon(
+                    Icons.tune_rounded,
+                    size: 13,
+                    color: AppColors.primary,
+                  ),
                   const SizedBox(width: 4),
-                  Text('MODE PRATINJAU TAMPILAN', style: AppTextStyles.overline),
+                  Text(
+                    'MODE PRATINJAU TAMPILAN',
+                    style: AppTextStyles.overline,
+                  ),
                 ],
               ),
               Container(
@@ -198,8 +212,13 @@ class _PreviewSwitcher extends StatelessWidget {
                   color: AppColors.primarySoft,
                   borderRadius: BorderRadius.circular(AppRadius.r9999),
                 ),
-                child: Text('BagiRasa Dev', style: AppTextStyles.badge.copyWith(
-                    fontSize: 10, color: AppColors.primaryDark)),
+                child: Text(
+                  'BagiRasa Dev',
+                  style: AppTextStyles.badge.copyWith(
+                    fontSize: 10,
+                    color: AppColors.primaryDark,
+                  ),
+                ),
               ),
             ],
           ),
@@ -243,15 +262,25 @@ class _PreviewPill extends StatelessWidget {
               ? const [BoxShadow(color: AppColors.border, blurRadius: 2)]
               : null,
         ),
-        child: Center(child: Text(label, style: AppTextStyles.badge.copyWith(
-            color: selected ? AppColors.textPrimary : AppColors.textSecondary))),
+        child: Center(
+          child: Text(
+            label,
+            style: AppTextStyles.badge.copyWith(
+              color: selected ? AppColors.textPrimary : AppColors.textSecondary,
+            ),
+          ),
+        ),
       ),
     );
   }
 }
 
 class _HeroPhoto extends StatelessWidget {
-  const _HeroPhoto({required this.listing, required this.status, required this.onBack});
+  const _HeroPhoto({
+    required this.listing,
+    required this.status,
+    required this.onBack,
+  });
 
   final FoodListing listing;
   final ListingStatus status;
@@ -274,13 +303,20 @@ class _HeroPhoto extends StatelessWidget {
                 color: AppColors.surface.withValues(alpha: 0.95),
                 borderRadius: BorderRadius.circular(AppRadius.r9999),
                 boxShadow: const [
-                  BoxShadow(color: AppColors.border, blurRadius: 0, offset: Offset(0, 3)),
+                  BoxShadow(
+                    color: AppColors.border,
+                    blurRadius: 0,
+                    offset: Offset(0, 3),
+                  ),
                 ],
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.location_on_outlined,
-                      size: 15, color: AppColors.primary),
+                  const Icon(
+                    Icons.location_on_outlined,
+                    size: 15,
+                    color: AppColors.primary,
+                  ),
                   const SizedBox(width: 6),
                   Text('Kampus Utama', style: AppTextStyles.badge),
                 ],
@@ -297,11 +333,17 @@ class _HeroPhoto extends StatelessWidget {
                 color: AppColors.surface.withValues(alpha: 0.95),
                 shape: BoxShape.circle,
                 boxShadow: const [
-                  BoxShadow(color: AppColors.border, blurRadius: 0, offset: Offset(0, 3)),
+                  BoxShadow(
+                    color: AppColors.border,
+                    blurRadius: 0,
+                    offset: Offset(0, 3),
+                  ),
                 ],
               ),
-              child: const Icon(Icons.bookmark_border_rounded,
-                  color: AppColors.textSecondary),
+              child: const Icon(
+                Icons.bookmark_border_rounded,
+                color: AppColors.textSecondary,
+              ),
             ),
           ),
           Positioned(
@@ -318,13 +360,20 @@ class _HeroPhoto extends StatelessWidget {
                 color: AppColors.surface.withValues(alpha: 0.95),
                 borderRadius: BorderRadius.circular(AppRadius.r9999),
                 boxShadow: const [
-                  BoxShadow(color: AppColors.border, blurRadius: 0, offset: Offset(0, 3)),
+                  BoxShadow(
+                    color: AppColors.border,
+                    blurRadius: 0,
+                    offset: Offset(0, 3),
+                  ),
                 ],
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.verified_outlined,
-                      size: 15, color: AppColors.tealDeep),
+                  const Icon(
+                    Icons.verified_outlined,
+                    size: 15,
+                    color: AppColors.tealDeep,
+                  ),
                   const SizedBox(width: 4),
                   Text('100% Layak Santap', style: AppTextStyles.badge),
                 ],
@@ -345,23 +394,28 @@ class _Photo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (path != null) {
-      if (path!.startsWith('assets/')) {
-        return Image.asset(path!, fit: BoxFit.cover);
-      }
-      return Image.file(File(path!), fit: BoxFit.cover);
+      return buildFoodPhoto(path!);
     }
     // TODO: add a real food-photo fallback asset when the data layer provides one.
     return Container(
       color: AppColors.surfaceWarm,
       child: const Center(
-        child: Icon(Icons.restaurant_rounded, size: 76, color: AppColors.primary),
+        child: Icon(
+          Icons.restaurant_rounded,
+          size: 76,
+          color: AppColors.primary,
+        ),
       ),
     );
   }
 }
 
 class _SummaryCard extends StatelessWidget {
-  const _SummaryCard({required this.listing, required this.status, required this.now});
+  const _SummaryCard({
+    required this.listing,
+    required this.status,
+    required this.now,
+  });
 
   final FoodListing listing;
   final ListingStatus status;
@@ -371,12 +425,14 @@ class _SummaryCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final progress = listing.quantityTotal == 0
         ? 0.0
-        : (listing.quantityRemaining / listing.quantityTotal).clamp(0.0, 1.0).toDouble();
+        : (listing.quantityRemaining / listing.quantityTotal)
+              .clamp(0.0, 1.0)
+              .toDouble();
     final accent = status == ListingStatus.segeraHabis
         ? AppColors.amber
         : status == ListingStatus.kadaluarsa
-            ? AppColors.danger
-            : AppColors.primary;
+        ? AppColors.danger
+        : AppColors.primary;
 
     return _DetailCard(
       child: Column(
@@ -387,11 +443,18 @@ class _SummaryCard extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  const Icon(Icons.schedule_outlined,
-                      size: 13, color: AppColors.textSecondary),
+                  const Icon(
+                    Icons.schedule_outlined,
+                    size: 13,
+                    color: AppColors.textSecondary,
+                  ),
                   const SizedBox(width: 4),
-                  Text('Diunggah 20 mnt lalu', style: AppTextStyles.badge.copyWith(
-                      color: AppColors.textSecondary)),
+                  Text(
+                    'Diunggah 20 mnt lalu',
+                    style: AppTextStyles.badge.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
                 ],
               ),
               _Tag(label: _foodTypeLabel(listing.foodType)),
@@ -415,11 +478,19 @@ class _SummaryCard extends StatelessWidget {
                   decoration: const BoxDecoration(
                     color: AppColors.primary,
                     shape: BoxShape.circle,
-                    boxShadow: [BoxShadow(color: AppColors.primaryDark,
-                        blurRadius: 0, offset: Offset(0, 2))],
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppColors.primaryDark,
+                        blurRadius: 0,
+                        offset: Offset(0, 2),
+                      ),
+                    ],
                   ),
-                  child: const Icon(Icons.storefront_outlined,
-                      color: AppColors.surface, size: 19),
+                  child: const Icon(
+                    Icons.storefront_outlined,
+                    color: AppColors.surface,
+                    size: 19,
+                  ),
                 ),
                 const SizedBox(width: 8),
                 Expanded(
@@ -429,15 +500,25 @@ class _SummaryCard extends StatelessWidget {
                     children: [
                       Row(
                         children: [
-                          Flexible(child: Text(listing.donorName,
+                          Flexible(
+                            child: Text(
+                              listing.donorName,
                               overflow: TextOverflow.ellipsis,
-                              style: AppTextStyles.cardTitle)),
+                              style: AppTextStyles.cardTitle,
+                            ),
+                          ),
                           const SizedBox(width: 4),
-                          const Icon(Icons.verified_outlined,
-                              size: 14, color: AppColors.tealDeep),
+                          const Icon(
+                            Icons.verified_outlined,
+                            size: 14,
+                            color: AppColors.tealDeep,
+                          ),
                         ],
                       ),
-                      Text('Donatur terverifikasi', style: AppTextStyles.caption),
+                      Text(
+                        'Donatur terverifikasi',
+                        style: AppTextStyles.caption,
+                      ),
                     ],
                   ),
                 ),
@@ -449,9 +530,14 @@ class _SummaryCard extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('${listing.quantityRemaining} dari ${listing.quantityTotal} ${listing.unit} tersisa',
-                  style: AppTextStyles.body.copyWith(fontWeight: FontWeight.w800)),
-              _Tag(label: _timeLeftText(listing.timeLeftAt(now)), color: accent),
+              Text(
+                '${listing.quantityRemaining} dari ${listing.quantityTotal} ${listing.unit} tersisa',
+                style: AppTextStyles.body.copyWith(fontWeight: FontWeight.w800),
+              ),
+              _Tag(
+                label: _timeLeftText(listing.timeLeftAt(now)),
+                color: accent,
+              ),
             ],
           ),
           const SizedBox(height: 5),
@@ -473,8 +559,10 @@ class _SummaryCard extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 4),
-          Text('Batas akhir pengambilan makanan: ${_formatDeadline(listing.expiresAt)}',
-              style: AppTextStyles.caption),
+          Text(
+            'Batas akhir pengambilan makanan: ${_formatDeadline(listing.expiresAt)}',
+            style: AppTextStyles.caption,
+          ),
         ],
       ),
     );
@@ -482,7 +570,9 @@ class _SummaryCard extends StatelessWidget {
 
   String _timeLeftText(Duration duration) {
     if (duration == Duration.zero) return 'Waktu habis';
-    if (duration.inHours > 0) return 'Sisa ${duration.inHours}j ${duration.inMinutes % 60}m';
+    if (duration.inHours > 0) {
+      return 'Sisa ${duration.inHours}j ${duration.inMinutes % 60}m';
+    }
     return 'Sisa ${duration.inMinutes}m';
   }
 
@@ -491,11 +581,11 @@ class _SummaryCard extends StatelessWidget {
   }
 
   String _foodTypeLabel(FoodType type) => switch (type) {
-        FoodType.makananBerat => 'Makanan Berat',
-        FoodType.camilan => 'Camilan / Roti',
-        FoodType.minuman => 'Minuman',
-        FoodType.lainnya => 'Lainnya',
-      };
+    FoodType.makananBerat => 'Makanan Berat',
+    FoodType.camilan => 'Camilan / Roti',
+    FoodType.minuman => 'Minuman',
+    FoodType.lainnya => 'Lainnya',
+  };
 }
 
 class _PickupCard extends StatelessWidget {
@@ -507,7 +597,10 @@ class _PickupCard extends StatelessWidget {
   Widget build(BuildContext context) {
     if (point == null) {
       return _DetailCard(
-        child: Text('Titik pengambilan tidak tersedia', style: AppTextStyles.body),
+        child: Text(
+          'Titik pengambilan tidak tersedia',
+          style: AppTextStyles.body,
+        ),
       );
     }
 
@@ -524,11 +617,16 @@ class _PickupCard extends StatelessWidget {
                   color: AppColors.primarySoft,
                   borderRadius: BorderRadius.circular(AppRadius.r8),
                 ),
-                child: const Icon(Icons.location_on_outlined,
-                    size: 17, color: AppColors.primary),
+                child: const Icon(
+                  Icons.location_on_outlined,
+                  size: 17,
+                  color: AppColors.primary,
+                ),
               ),
               const SizedBox(width: 8),
-              Expanded(child: Text('Titik Pengambilan', style: AppTextStyles.heading)),
+              Expanded(
+                child: Text('Titik Pengambilan', style: AppTextStyles.heading),
+              ),
               _Tag(label: 'Buka', color: AppColors.tealDeep),
             ],
           ),
@@ -543,24 +641,38 @@ class _PickupCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(AppRadius.r12),
               child: FlutterMap(
                 options: MapOptions(
-                  initialCenter: LatLng(point.latitude as double, point.longitude as double),
+                  initialCenter: LatLng(
+                    point.latitude as double,
+                    point.longitude as double,
+                  ),
                   initialZoom: 16,
-                  interactionOptions: const InteractionOptions(flags: InteractiveFlag.none),
+                  interactionOptions: const InteractionOptions(
+                    flags: InteractiveFlag.none,
+                  ),
                 ),
                 children: [
                   TileLayer(
-                    urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                    urlTemplate:
+                        'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
                     userAgentPackageName: 'com.bagirasa.unand',
                   ),
-                  MarkerLayer(markers: [
-                    Marker(
-                      point: LatLng(point.latitude as double, point.longitude as double),
-                      width: 36,
-                      height: 36,
-                      child: const Icon(Icons.location_on,
-                          color: AppColors.primary, size: 34),
-                    ),
-                  ]),
+                  MarkerLayer(
+                    markers: [
+                      Marker(
+                        point: LatLng(
+                          point.latitude as double,
+                          point.longitude as double,
+                        ),
+                        width: 36,
+                        height: 36,
+                        child: const Icon(
+                          Icons.location_on,
+                          color: AppColors.primary,
+                          size: 34,
+                        ),
+                      ),
+                    ],
+                  ),
                 ],
               ),
             ),
@@ -572,8 +684,13 @@ class _PickupCard extends StatelessWidget {
             decoration: BoxDecoration(
               color: AppColors.surface.withValues(alpha: 0.95),
               borderRadius: BorderRadius.circular(AppRadius.r8),
-              boxShadow: const [BoxShadow(color: AppColors.border,
-                  blurRadius: 0, offset: Offset(0, 2))],
+              boxShadow: const [
+                BoxShadow(
+                  color: AppColors.border,
+                  blurRadius: 0,
+                  offset: Offset(0, 2),
+                ),
+              ],
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -583,14 +700,17 @@ class _PickupCard extends StatelessWidget {
                   onTap: () {
                     Navigator.of(context).push(
                       MaterialPageRoute(
-                        builder: (_) => RouteScreen(
-                          pickupPointId: point.id as String,
-                        ),
+                        builder: (_) =>
+                            RouteScreen(pickupPointId: point.id as String),
                       ),
                     );
                   },
-                  child: Text('Buka Peta  →', style: AppTextStyles.badge.copyWith(
-                      color: AppColors.tealDeep)),
+                  child: Text(
+                    'Buka Peta  →',
+                    style: AppTextStyles.badge.copyWith(
+                      color: AppColors.tealDeep,
+                    ),
+                  ),
                 ),
               ],
             ),
@@ -646,18 +766,25 @@ class _DescriptionCard extends StatelessWidget {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Icon(Icons.info_outline_rounded,
-                    color: AppColors.primary, size: 19),
+                const Icon(
+                  Icons.info_outline_rounded,
+                  color: AppColors.primary,
+                  size: 19,
+                ),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Catatan Penting Pengambilan',
-                          style: AppTextStyles.badge),
+                      Text(
+                        'Catatan Penting Pengambilan',
+                        style: AppTextStyles.badge,
+                      ),
                       const SizedBox(height: 2),
-                      Text('Tunjukkan kode klaim aplikasi kepada petugas stan. Sangat disarankan membawa tote bag atau kantong sendiri demi kelestarian kampus hijau.',
-                          style: AppTextStyles.caption),
+                      Text(
+                        'Tunjukkan kode klaim aplikasi kepada petugas stan. Sangat disarankan membawa tote bag atau kantong sendiri demi kelestarian kampus hijau.',
+                        style: AppTextStyles.caption,
+                      ),
                     ],
                   ),
                 ),
@@ -690,8 +817,13 @@ class _CommunityCard extends StatelessWidget {
             decoration: BoxDecoration(
               color: AppColors.surface,
               borderRadius: BorderRadius.circular(AppRadius.r16),
-              boxShadow: const [BoxShadow(color: AppColors.border,
-                  blurRadius: 0, offset: Offset(0, 3))],
+              boxShadow: const [
+                BoxShadow(
+                  color: AppColors.border,
+                  blurRadius: 0,
+                  offset: Offset(0, 3),
+                ),
+              ],
             ),
             child: Image.asset('assets/images/rasi_empty.png'),
           ),
@@ -701,8 +833,10 @@ class _CommunityCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text('Kamu Pahlawan Pangan!', style: AppTextStyles.cardTitle),
-                Text('Mengklaim donasi ini menyelamatkan makanan dan membantu kampus lebih hijau.',
-                    style: AppTextStyles.caption),
+                Text(
+                  'Mengklaim donasi ini menyelamatkan makanan dan membantu kampus lebih hijau.',
+                  style: AppTextStyles.caption,
+                ),
               ],
             ),
           ),
@@ -736,24 +870,42 @@ class _DetailActionBar extends StatelessWidget {
         decoration: BoxDecoration(
           color: AppColors.surface.withValues(alpha: 0.97),
           boxShadow: const [
-            BoxShadow(color: AppColors.border, blurRadius: 16, offset: Offset(0, -4)),
+            BoxShadow(
+              color: AppColors.border,
+              blurRadius: 16,
+              offset: Offset(0, -4),
+            ),
           ],
         ),
         child: isOwner
             ? Row(
                 children: [
-                  Expanded(child: ChunkyButton(
-                    label: 'UBAH', onTap: onEdit, height: 52,
-                    icon: const Icon(Icons.edit_outlined, size: 17,
-                        color: AppColors.surface),
-                  )),
+                  Expanded(
+                    child: ChunkyButton(
+                      label: 'UBAH',
+                      onTap: onEdit,
+                      height: 52,
+                      icon: const Icon(
+                        Icons.edit_outlined,
+                        size: 17,
+                        color: AppColors.surface,
+                      ),
+                    ),
+                  ),
                   const SizedBox(width: 10),
-                  Expanded(child: ChunkyButton(
-                    label: 'HAPUS', onTap: onDelete,
-                    variant: ChunkyButtonVariant.danger, height: 52,
-                    icon: const Icon(Icons.delete_outline_rounded, size: 17,
-                        color: AppColors.surface),
-                  )),
+                  Expanded(
+                    child: ChunkyButton(
+                      label: 'HAPUS',
+                      onTap: onDelete,
+                      variant: ChunkyButtonVariant.danger,
+                      height: 52,
+                      icon: const Icon(
+                        Icons.delete_outline_rounded,
+                        size: 17,
+                        color: AppColors.surface,
+                      ),
+                    ),
+                  ),
                 ],
               )
             : Column(
@@ -763,8 +915,11 @@ class _DetailActionBar extends StatelessWidget {
                     label: isClosed ? 'KLAIM TIDAK TERSEDIA' : 'KLAIM MAKANAN',
                     onTap: isClosed ? null : onClaim,
                     height: 56,
-                    icon: const Icon(Icons.volunteer_activism_outlined,
-                        size: 18, color: AppColors.surface),
+                    icon: const Icon(
+                      Icons.volunteer_activism_outlined,
+                      size: 18,
+                      color: AppColors.surface,
+                    ),
                   ),
                   const SizedBox(height: 4),
                   Text(
@@ -772,7 +927,8 @@ class _DetailActionBar extends StatelessWidget {
                         ? 'Listing ini sudah tidak dapat diklaim.'
                         : '100% Gratis  •  Maksimal 1 Porsi per Mahasiswa',
                     style: AppTextStyles.badge.copyWith(
-                        color: AppColors.textSecondary),
+                      color: AppColors.textSecondary,
+                    ),
                     textAlign: TextAlign.center,
                   ),
                 ],
@@ -796,7 +952,11 @@ class _DetailCard extends StatelessWidget {
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(AppRadius.r20),
         boxShadow: const [
-          BoxShadow(color: AppColors.border, blurRadius: 0, offset: Offset(0, 3)),
+          BoxShadow(
+            color: AppColors.border,
+            blurRadius: 0,
+            offset: Offset(0, 3),
+          ),
         ],
       ),
       child: child,
@@ -838,8 +998,10 @@ class _SmallTag extends StatelessWidget {
         color: AppColors.background,
         borderRadius: BorderRadius.circular(AppRadius.r9999),
       ),
-      child: Text('✓ $label', style: AppTextStyles.badge.copyWith(
-          color: AppColors.brownMid)),
+      child: Text(
+        '✓ $label',
+        style: AppTextStyles.badge.copyWith(color: AppColors.brownMid),
+      ),
     );
   }
 }

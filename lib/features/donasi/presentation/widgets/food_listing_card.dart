@@ -5,6 +5,7 @@ import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../data/food_listing.dart';
 import 'status_badge.dart';
+import 'food_photo.dart';
 
 class FoodListingCard extends StatelessWidget {
   const FoodListingCard({
@@ -23,7 +24,8 @@ class FoodListingCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final status = listing.statusAt(now);
-    final muted = status == ListingStatus.habisDiklaim ||
+    final muted =
+        status == ListingStatus.habisDiklaim ||
         status == ListingStatus.kadaluarsa;
     final accent = switch (status) {
       ListingStatus.tersedia => AppColors.tealDeep,
@@ -110,7 +112,7 @@ class _ListingPhoto extends StatelessWidget {
                 ),
               )
             else
-              Image.asset(path!, fit: BoxFit.cover),
+              buildFoodPhoto(path!),
             Positioned(
               left: 8,
               top: 8,
@@ -148,8 +150,8 @@ class _ListingDetails extends StatelessWidget {
       color: status == ListingStatus.habisDiklaim
           ? AppColors.slate
           : status == ListingStatus.kadaluarsa
-              ? AppColors.brownMid
-              : AppColors.textPrimary,
+          ? AppColors.brownMid
+          : AppColors.textPrimary,
       decoration: status == ListingStatus.habisDiklaim
           ? TextDecoration.lineThrough
           : null,
@@ -157,97 +159,106 @@ class _ListingDetails extends StatelessWidget {
     final progress = listing.quantityTotal == 0
         ? 0.0
         : (listing.quantityRemaining / listing.quantityTotal)
-            .clamp(0.0, 1.0)
-            .toDouble();
-    final isClosed = status == ListingStatus.habisDiklaim ||
+              .clamp(0.0, 1.0)
+              .toDouble();
+    final isClosed =
+        status == ListingStatus.habisDiklaim ||
         status == ListingStatus.kadaluarsa;
 
     return SizedBox(
       height: 114,
       child: ClipRect(
         child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(listing.name,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              listing.name,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
-              style: titleStyle),
-          Row(
-            children: [
-              Icon(Icons.storefront_outlined, size: 14, color: accent),
-              const SizedBox(width: 4),
-              Expanded(
-                child: Text(pickupPointName,
+              style: titleStyle,
+            ),
+            Row(
+              children: [
+                Icon(Icons.storefront_outlined, size: 14, color: accent),
+                const SizedBox(width: 4),
+                Expanded(
+                  child: Text(
+                    pickupPointName,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: AppTextStyles.caption),
-              ),
-            ],
-          ),
-          const Spacer(),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                '${listing.quantityRemaining} dari ${listing.quantityTotal} ${listing.unit}',
-                style: AppTextStyles.badge.copyWith(color: accent),
-              ),
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.schedule_outlined, size: 13, color: accent),
-                  const SizedBox(width: 2),
-                  Text(_timeLeftText(listing.timeLeftAt(now)),
-                      style: AppTextStyles.badge.copyWith(color: accent)),
-                ],
-              ),
-            ],
-          ),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(AppRadius.r9999),
-            child: SizedBox(
-              height: 8,
-              child: Stack(
-                fit: StackFit.expand,
-                children: [
-                  Container(
+                    style: AppTextStyles.caption,
+                  ),
+                ),
+              ],
+            ),
+            const Spacer(),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  '${listing.quantityRemaining} dari ${listing.quantityTotal} ${listing.unit}',
+                  style: AppTextStyles.badge.copyWith(color: accent),
+                ),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.schedule_outlined, size: 13, color: accent),
+                    const SizedBox(width: 2),
+                    Text(
+                      _timeLeftText(listing.timeLeftAt(now)),
+                      style: AppTextStyles.badge.copyWith(color: accent),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(AppRadius.r9999),
+              child: SizedBox(
+                height: 8,
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    Container(
                       color: status == ListingStatus.kadaluarsa
                           ? AppColors.dangerSoft
-                          : AppColors.surfaceWarm),
-                  FractionallySizedBox(
-                    alignment: Alignment.centerLeft,
-                    widthFactor: isClosed && progress == 0 ? 1 : progress,
-                    child: Container(color: accent),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          const Spacer(),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Expanded(
-                child: Text(
-                  isClosed
-                      ? status == ListingStatus.kadaluarsa
-                          ? 'Batas pengambilan usai'
-                          : 'Selesai diambil'
-                      : 'Rp0 (Donasi Canteen)',
-                  style: AppTextStyles.badge.copyWith(
-                      color: isClosed
-                          ? AppColors.textSecondary
-                          : AppColors.primaryDeep),
+                          : AppColors.surfaceWarm,
+                    ),
+                    FractionallySizedBox(
+                      alignment: Alignment.centerLeft,
+                      widthFactor: isClosed && progress == 0 ? 1 : progress,
+                      child: Container(color: accent),
+                    ),
+                  ],
                 ),
               ),
-              _ActionButton(
-                label: isClosed ? 'Tutup' : 'Klaim',
-                enabled: !isClosed,
-                onTap: onTap,
-              ),
-            ],
-          ),
-        ],
+            ),
+            const Spacer(),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Text(
+                    isClosed
+                        ? status == ListingStatus.kadaluarsa
+                              ? 'Batas pengambilan usai'
+                              : 'Selesai diambil'
+                        : 'Rp0 (Donasi Canteen)',
+                    style: AppTextStyles.badge.copyWith(
+                      color: isClosed
+                          ? AppColors.textSecondary
+                          : AppColors.primaryDeep,
+                    ),
+                  ),
+                ),
+                _ActionButton(
+                  label: isClosed ? 'Tutup' : 'Klaim',
+                  enabled: !isClosed,
+                  onTap: onTap,
+                ),
+              ],
+            ),
+          ],
         ),
       ),
     );
@@ -296,13 +307,19 @@ class _ActionButton extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(label,
-                style: AppTextStyles.badge.copyWith(
-                    color: enabled ? AppColors.surface : AppColors.slate)),
+            Text(
+              label,
+              style: AppTextStyles.badge.copyWith(
+                color: enabled ? AppColors.surface : AppColors.slate,
+              ),
+            ),
             if (enabled) ...[
               const SizedBox(width: 4),
-              const Icon(Icons.arrow_forward_rounded,
-                  size: 14, color: AppColors.surface),
+              const Icon(
+                Icons.arrow_forward_rounded,
+                size: 14,
+                color: AppColors.surface,
+              ),
             ],
           ],
         ),

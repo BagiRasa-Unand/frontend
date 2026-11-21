@@ -30,4 +30,7 @@ abstract class AppRadius {
 
   /// 9999 px — fully round pills / circles
   static const double r9999 = 9999;
+
+  /// Alias for fully rounded pill shapes
+  static const double pill = r9999;
 }

@@ -64,4 +64,51 @@ class PickupPoint {
       status: status ?? this.status,
     );
   }
+
+  factory PickupPoint.fromJson(Map<String, dynamic> json) {
+    double parseCoordinate(dynamic val) {
+      if (val is num) return val.toDouble();
+      if (val is String) return double.tryParse(val) ?? 0.0;
+      return 0.0;
+    }
+
+    PickupPointStatus parseStatus(dynamic st, dynamic isActive) {
+      if (isActive == false) return PickupPointStatus.nonAktif;
+      final s = st?.toString().toLowerCase();
+      if (s == 'tutup') return PickupPointStatus.tutup;
+      if (s == 'nonaktif' || s == 'non_aktif') return PickupPointStatus.nonAktif;
+      return PickupPointStatus.aktif;
+    }
+
+    return PickupPoint(
+      id: json['id']?.toString() ?? '',
+      name: json['name']?.toString() ?? '',
+      address: json['address']?.toString() ?? '',
+      latitude: parseCoordinate(json['latitude']),
+      longitude: parseCoordinate(json['longitude']),
+      openTime: json['openTime']?.toString() ?? json['openHour']?.toString() ?? '08:00',
+      closeTime: json['closeTime']?.toString() ?? json['closeHour']?.toString() ?? '20:00',
+      note: json['note']?.toString() ?? json['picName']?.toString() ?? '',
+      photoPath: json['photoPath']?.toString() ?? json['photoUrl']?.toString(),
+      activeListingCount: (json['activeListingCount'] as num?)?.toInt() ?? 0,
+      status: parseStatus(json['status'], json['isActive']),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      'address': address,
+      'latitude': latitude,
+      'longitude': longitude,
+      'openTime': openTime,
+      'closeTime': closeTime,
+      'note': note,
+      'photoPath': photoPath,
+      'status': status.name,
+      'isActive': status == PickupPointStatus.aktif,
+      'activeListingCount': activeListingCount,
+    };
+  }
 }

@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_map/flutter_map.dart';
@@ -13,6 +11,7 @@ import '../../../core/theme/app_text_styles.dart';
 import '../../../core/widgets/chunky_button.dart';
 import '../../donasi/data/food_listing.dart';
 import '../../donasi/data/food_listing_repository.dart';
+import '../../donasi/presentation/widgets/food_photo.dart';
 import '../../lokasi/data/pickup_point.dart';
 import '../../lokasi/data/pickup_point_repository.dart';
 import '../../lokasi/presentation/countdown_screen.dart';
@@ -775,10 +774,7 @@ class _ListingItemCard extends StatelessWidget {
 
   Widget _buildPhoto(String? path) {
     if (path != null && path.isNotEmpty) {
-      final file = File(path);
-      if (file.existsSync()) {
-        return Image.file(file, fit: BoxFit.cover);
-      }
+      return buildFoodPhoto(path, fit: BoxFit.cover);
     }
     return Container(
       color: AppColors.surfaceWarm,

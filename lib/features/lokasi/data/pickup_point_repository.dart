@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:latlong2/latlong.dart';
+import '../../../core/network/api_config.dart';
 import 'pickup_point.dart';
 
 /// Koordinat pusat kampus (Universitas Andalas, Padang).
@@ -26,17 +27,9 @@ class PickupPointRepository extends ChangeNotifier {
   }
 
   /// Base URL API Backend BagiRasa
-  /// - Di HP fisik (dengan `adb reverse tcp:5000 tcp:5000`), web, & desktop: http://127.0.0.1:5000/api/v1
-  /// - Di Android Emulator standar: http://10.0.2.2:5000/api/v1
-  static String get defaultBaseUrl {
-    if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
-      // 127.0.0.1 bekerja langsung untuk HP fisik yang di-reverse port via adb
-      return 'http://127.0.0.1:5000/api/v1';
-    }
-    return 'http://localhost:5000/api/v1';
-  }
+  static String get defaultBaseUrl => ApiConfig.baseUrl;
 
-  String _baseUrl = defaultBaseUrl;
+  String _baseUrl = ApiConfig.baseUrl;
   String get baseUrl => _baseUrl;
   set baseUrl(String url) {
     _baseUrl = url;
@@ -265,7 +258,7 @@ class PickupPointRepository extends ChangeNotifier {
         status: PickupPointStatus.aktif,
       ),
       PickupPoint(
-        id: 'pp-001',
+        id: 'b0000000-0000-0000-0000-000000000004',
         name: 'Kantin Teknik Sisfo',
         address: 'Gedung Teknik Informasi, Lt. 1, Kampus Unand',
         latitude: kCampusCenterLat + 0.0007,
@@ -277,7 +270,7 @@ class PickupPointRepository extends ChangeNotifier {
         status: PickupPointStatus.aktif,
       ),
       PickupPoint(
-        id: 'pp-002',
+        id: 'b0000000-0000-0000-0000-000000000005',
         name: 'Kantin Rektorat',
         address: 'Gedung Rektorat, Lantai Dasar, Kampus Unand',
         latitude: kCampusCenterLat + 0.0005,
@@ -289,7 +282,7 @@ class PickupPointRepository extends ChangeNotifier {
         status: PickupPointStatus.aktif,
       ),
       PickupPoint(
-        id: 'pp-006',
+        id: 'b0000000-0000-0000-0000-000000000006',
         name: 'Kantin Asrama Putra',
         address: 'Gedung Asrama Putra Blok A, Kampus Unand',
         latitude: kCampusCenterLat - 0.0008,
@@ -301,7 +294,7 @@ class PickupPointRepository extends ChangeNotifier {
         status: PickupPointStatus.aktif,
       ),
       PickupPoint(
-        id: 'pp-003',
+        id: 'b0000000-0000-0000-0000-000000000007',
         name: 'Kantin FEB Corner',
         address: 'Gedung Fakultas Ekonomi Bisnis, Selasar Timur',
         latitude: kCampusCenterLat + 0.0020,
@@ -313,7 +306,7 @@ class PickupPointRepository extends ChangeNotifier {
         status: PickupPointStatus.aktif,
       ),
       PickupPoint(
-        id: 'pp-004',
+        id: 'b0000000-0000-0000-0000-000000000008',
         name: 'Kantin Faperta Barat',
         address: 'Gedung Pertanian, Pintu Barat, Kampus Unand',
         latitude: kCampusCenterLat - 0.0025,
@@ -325,7 +318,7 @@ class PickupPointRepository extends ChangeNotifier {
         status: PickupPointStatus.aktif,
       ),
       PickupPoint(
-        id: 'pp-005',
+        id: 'b0000000-0000-0000-0000-000000000009',
         name: 'Stand BEM Pusat',
         address: 'Gedung PKM, Halaman Utama, Kampus Unand',
         latitude: kCampusCenterLat + 0.0005,

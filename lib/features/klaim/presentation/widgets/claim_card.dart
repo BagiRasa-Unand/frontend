@@ -5,6 +5,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../donasi/data/food_listing.dart';
+import '../../../donasi/presentation/widgets/food_photo.dart';
 import '../../../lokasi/data/pickup_point.dart';
 import '../../../lokasi/presentation/countdown_screen.dart';
 import '../../data/claim.dart';
@@ -110,11 +111,7 @@ class ClaimCard extends StatelessWidget {
                       children: [
                         if (listing.photoPath != null &&
                             listing.photoPath!.isNotEmpty)
-                          Image.asset(
-                            listing.photoPath!,
-                            fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) => _buildFallbackPhoto(),
-                          )
+                          buildFoodPhoto(listing.photoPath!)
                         else
                           _buildFallbackPhoto(),
                         Positioned(
@@ -522,11 +519,7 @@ class ClaimCard extends StatelessWidget {
                       fit: StackFit.expand,
                       children: [
                         if (listing.photoPath != null && listing.photoPath!.isNotEmpty)
-                          Image.asset(
-                            listing.photoPath!,
-                            fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) => _buildFallbackPhoto(),
-                          )
+                          buildFoodPhoto(listing.photoPath!)
                         else
                           _buildFallbackPhoto(),
                         Positioned(

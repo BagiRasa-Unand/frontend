@@ -1,3 +1,6 @@
+import 'dart:convert';
+import '../../../core/network/api_config.dart';
+
 enum ListingStatus { tersedia, segeraHabis, habisDiklaim, kadaluarsa }
 
 enum FoodType { makananBerat, camilan, minuman, lainnya }
@@ -83,6 +86,94 @@ class FoodListing {
       createdAt: createdAt ?? this.createdAt,
       expiresAt: expiresAt ?? this.expiresAt,
     );
+  }
+
+  factory FoodListing.fromJson(Map<String, dynamic> json) {
+    FoodType parseFoodType(dynamic catId, dynamic catName) {
+      final name = catName?.toString().toLowerCase() ?? '';
+      if (name.contains('roti') || name.contains('kue') || name.contains('camilan') || catId == 2) {
+        return FoodType.camilan;
+      }
+      if (name.contains('minuman') || name.contains('drink') || catId == 5) {
+        return FoodType.minuman;
+      }
+      if (name.contains('mentah') || name.contains('buah') || name.contains('sayur') || catId == 3 || catId == 4) {
+        return FoodType.lainnya;
+      }
+      return FoodType.makananBerat;
+    }
+
+    final createdAtRaw = json['createdAt'] ?? json['created_at'];
+    final expiresAtRaw = json['expiresAt'] ?? json['expires_at'] ?? json['pickupEndAt'];
+
+    String? photoUrl = json['photoPath']?.toString() ?? json['photo_path']?.toString();
+    if (photoUrl == null || photoUrl.isEmpty) {
+      if (json['photos'] is List && (json['photos'] as List).isNotEmpty) {
+        final firstPhoto = (json['photos'] as List).first;
+        if (firstPhoto is Map) {
+          photoUrl = firstPhoto['photoUrl']?.toString() ?? firstPhoto['photo_url']?.toString();
+        }
+      } else if (json['photos'] is String) {
+        try {
+          final parsed = jsonDecode(json['photos']);
+          if (parsed is List && parsed.isNotEmpty) {
+            photoUrl = parsed.first['photoUrl']?.toString() ?? parsed.first['photo_url']?.toString();
+          }
+        } catch (_) {}
+      }
+    }
+    final resolvedPhoto = ApiConfig.resolveImageUrl(photoUrl);
+
+    return FoodListing(
+      id: json['id']?.toString() ?? '',
+      donorId: json['donorId']?.toString() ?? json['donor_id']?.toString() ?? '',
+      donorName: json['donorName']?.toString() ?? json['donor_name']?.toString() ?? 'Donatur',
+      name: json['name']?.toString() ?? json['title']?.toString() ?? '',
+      foodType: parseFoodType(json['categoryId'] ?? json['category_id'], json['categoryName']),
+      description: json['description']?.toString() ?? '',
+      quantityTotal: json['quantityTotal'] as int? ?? json['total_portions'] as int? ?? 1,
+      quantityRemaining: json['quantityRemaining'] as int? ?? json['remaining_portions'] as int? ?? 0,
+      unit: json['unit']?.toString() ?? 'porsi',
+      photoPath: resolvedPhoto,
+      pickupPointId: json['pickupPointId']?.toString() ?? json['pickup_point_id']?.toString() ?? '',
+      createdAt: createdAtRaw != null
+          ? DateTime.tryParse(createdAtRaw.toString()) ?? DateTime.now()
+          : DateTime.now(),
+      expiresAt: expiresAtRaw != null
+          ? DateTime.tryParse(expiresAtRaw.toString()) ?? DateTime.now().add(const Duration(hours: 3))
+          : DateTime.now().add(const Duration(hours: 3)),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    int categoryId = 1;
+    switch (foodType) {
+      case FoodType.makananBerat:
+        categoryId = 1;
+        break;
+      case FoodType.camilan:
+        categoryId = 2;
+        break;
+      case FoodType.lainnya:
+        categoryId = 3;
+        break;
+      case FoodType.minuman:
+        categoryId = 5;
+        break;
+    }
+
+    return {
+      'id': id,
+      'title': name,
+      'description': description,
+      'categoryId': categoryId,
+      'pickupPointId': pickupPointId,
+      'totalPortions': quantityTotal,
+      'remainingPortions': quantityRemaining,
+      'pickupStartAt': createdAt.toIso8601String(),
+      'pickupEndAt': expiresAt.toIso8601String(),
+      'expiresAt': expiresAt.toIso8601String(),
+    };
   }
 }
 

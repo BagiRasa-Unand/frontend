@@ -1,12 +1,44 @@
 import 'package:flutter/foundation.dart';
 
 import '../../../core/app_session.dart';
+import 'donation_api_service.dart';
 import 'food_listing.dart';
 
 class FoodListingRepository extends ChangeNotifier {
-  FoodListingRepository() : _items = _seed(DateTime.now());
+  FoodListingRepository({DonationApiService? apiService})
+      : _apiService = apiService ?? DonationApiService(),
+        _items = _seed(DateTime.now()) {
+    // Sinkronisasi data awal langsung dari PostgreSQL backend
+    fetchFromApi();
+  }
 
-  final List<FoodListing> _items;
+  final DonationApiService _apiService;
+  List<FoodListing> _items;
+  bool _isLoading = false;
+  bool get isLoading => _isLoading;
+
+  /// Memuat daftar donasi makanan riil dari PostgreSQL backend
+  Future<void> fetchFromApi({String? search, String? categoryId}) async {
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      final backendList = await _apiService.getDonations(
+        search: search,
+        categoryId: categoryId,
+      );
+
+      if (backendList != null && backendList.isNotEmpty) {
+        _items = backendList;
+        notifyListeners();
+      }
+    } catch (e) {
+      debugPrint('[FoodListingRepository] Fetch error: $e');
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
 
   List<FoodListing> getAll() => List.unmodifiable(_items);
 
@@ -24,6 +56,26 @@ class FoodListingRepository extends ChangeNotifier {
   void add(FoodListing listing) {
     _items.add(listing);
     notifyListeners();
+
+    _syncAdd(listing);
+  }
+
+  Future<void> _syncAdd(FoodListing listing) async {
+    try {
+      final created = await _apiService.createDonation(
+        listing,
+        imagePath: listing.photoPath,
+      );
+      if (created != null) {
+        final idx = _items.indexWhere((item) => item.id == listing.id);
+        if (idx != -1) {
+          _items[idx] = created;
+          notifyListeners();
+        }
+      }
+    } catch (e) {
+      debugPrint('[FoodListingRepository] Sync add error: $e');
+    }
   }
 
   void update(FoodListing listing) {
@@ -31,6 +83,16 @@ class FoodListingRepository extends ChangeNotifier {
     if (index == -1) return;
     _items[index] = listing;
     notifyListeners();
+
+    _syncUpdate(listing);
+  }
+
+  Future<void> _syncUpdate(FoodListing listing) async {
+    try {
+      await _apiService.updateDonation(listing);
+    } catch (e) {
+      debugPrint('[FoodListingRepository] Sync update error: $e');
+    }
   }
 
   bool delete(String id) {
@@ -38,7 +100,17 @@ class FoodListingRepository extends ChangeNotifier {
     if (listing == null || listing.claimedQuantity > 0) return false;
     _items.remove(listing);
     notifyListeners();
+
+    _syncDelete(id);
     return true;
+  }
+
+  Future<void> _syncDelete(String id) async {
+    try {
+      await _apiService.cancelDonation(id);
+    } catch (e) {
+      debugPrint('[FoodListingRepository] Sync delete error: $e');
+    }
   }
 
   bool decreaseStock(String id, int qty) {
@@ -67,7 +139,7 @@ class FoodListingRepository extends ChangeNotifier {
         id: 'food-001', donorId: kCurrentUserId, donorName: 'Budi Santoso',
         name: 'Nasi Ayam Bakar Rempah', foodType: FoodType.makananBerat,
         description: 'Nasi ayam dengan sambal dan lalapan.', quantityTotal: 10,
-        quantityRemaining: 10, pickupPointId: 'pp-001',
+        quantityRemaining: 10, pickupPointId: 'b0000000-0000-0000-0000-000000000001',
         createdAt: now.subtract(const Duration(minutes: 10)),
         expiresAt: now.add(const Duration(minutes: 25)),
       ),
@@ -75,7 +147,7 @@ class FoodListingRepository extends ChangeNotifier {
         id: 'food-002', donorId: kCurrentUserId, donorName: 'Budi Santoso',
         name: 'Paket Pastel & Lemper Ceria', foodType: FoodType.camilan,
         description: 'Aneka camilan untuk teman belajar.', quantityTotal: 10,
-        quantityRemaining: 1, pickupPointId: 'pp-002',
+        quantityRemaining: 1, pickupPointId: 'b0000000-0000-0000-0000-000000000002',
         createdAt: now.subtract(const Duration(hours: 1)),
         expiresAt: now.add(const Duration(minutes: 15)),
       ),
@@ -83,49 +155,9 @@ class FoodListingRepository extends ChangeNotifier {
         id: 'food-003', donorId: kCurrentUserId, donorName: 'Budi Santoso',
         name: 'Nasi Kotak Ayam Sambal Ijo', foodType: FoodType.makananBerat,
         description: 'Nasi kotak siap santap.', quantityTotal: 8,
-        quantityRemaining: 0, pickupPointId: 'pp-006',
+        quantityRemaining: 0, pickupPointId: 'b0000000-0000-0000-0000-000000000003',
         createdAt: now.subtract(const Duration(hours: 2)),
         expiresAt: now.add(const Duration(hours: 1)),
-      ),
-      FoodListing(
-        id: 'food-004', donorId: 'donor-campus-1', donorName: 'Siti Rahma',
-        name: 'Teh Manis Dingin', foodType: FoodType.minuman,
-        description: 'Minuman segar dalam botol.', quantityTotal: 12,
-        quantityRemaining: 12, pickupPointId: 'pp-003',
-        createdAt: now.subtract(const Duration(hours: 3)),
-        expiresAt: now.subtract(const Duration(minutes: 10)),
-      ),
-      FoodListing(
-        id: 'food-005', donorId: 'donor-campus-2', donorName: 'Dina Putri',
-        name: 'Roti Isi Cokelat', foodType: FoodType.camilan,
-        description: 'Roti lembut dengan isian cokelat.', quantityTotal: 6,
-        quantityRemaining: 6, pickupPointId: 'pp-004',
-        createdAt: now.subtract(const Duration(minutes: 30)),
-        expiresAt: now.add(const Duration(hours: 4)),
-      ),
-      FoodListing(
-        id: 'food-006', donorId: 'donor-campus-1', donorName: 'Siti Rahma',
-        name: 'Buah Potong Segar', foodType: FoodType.lainnya,
-        description: 'Potongan buah segar harian.', quantityTotal: 5,
-        quantityRemaining: 5, pickupPointId: 'pp-005',
-        createdAt: now.subtract(const Duration(minutes: 20)),
-        expiresAt: now.add(const Duration(hours: 2)),
-      ),
-      FoodListing(
-        id: 'food-007', donorId: 'donor-campus-3', donorName: 'Uni Evi (Kantin Barokah)',
-        name: 'Nasi Padang Ayam Gulai', foodType: FoodType.makananBerat,
-        description: 'Nasi padang hangat lengkap dengan gulai ayam dan daun singkong.',
-        quantityTotal: 8, quantityRemaining: 8, pickupPointId: 'pp-001',
-        createdAt: now.subtract(const Duration(minutes: 15)),
-        expiresAt: now.add(const Duration(hours: 3)),
-      ),
-      FoodListing(
-        id: 'food-008', donorId: 'donor-campus-4', donorName: 'Pak Wahyu (Kedai Camilan)',
-        name: 'Pisang Goreng Keju & Risoles', foodType: FoodType.camilan,
-        description: 'Paket camilan sore masih hangat, renyah dan higienis.',
-        quantityTotal: 5, quantityRemaining: 5, pickupPointId: 'pp-002',
-        createdAt: now.subtract(const Duration(minutes: 25)),
-        expiresAt: now.add(const Duration(hours: 2)),
       ),
     ];
   }

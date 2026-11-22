@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -9,6 +7,7 @@ import '../../../core/theme/app_radius.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/widgets/chunky_button.dart';
 import '../../donasi/data/food_listing.dart';
+import '../../donasi/presentation/widgets/food_photo.dart';
 import '../../lokasi/data/pickup_point_repository.dart';
 import '../data/claim.dart';
 import '../data/claim_repository.dart';
@@ -420,10 +419,7 @@ class _MiniListingCard extends StatelessWidget {
 
   Widget _buildPhoto(String? path) {
     if (path != null && path.isNotEmpty) {
-      final file = File(path);
-      if (file.existsSync()) {
-        return Image.file(file, fit: BoxFit.cover);
-      }
+      return buildFoodPhoto(path, fit: BoxFit.cover);
     }
     return Container(
       color: AppColors.surfaceWarm,

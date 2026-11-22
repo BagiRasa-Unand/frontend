@@ -1,11 +1,38 @@
 import 'package:flutter/foundation.dart';
 
 import 'app_notification.dart';
+import 'notification_api_service.dart';
 
 class NotificationRepository extends ChangeNotifier {
-  NotificationRepository() : _items = _seed(DateTime.now());
+  NotificationRepository({NotificationApiService? apiService})
+      : _apiService = apiService ?? NotificationApiService(),
+        _items = _seed(DateTime.now()) {
+    fetchFromApi();
+  }
 
-  final List<AppNotification> _items;
+  final NotificationApiService _apiService;
+  List<AppNotification> _items;
+  bool _isLoading = false;
+  bool get isLoading => _isLoading;
+
+  /// Memuat notifikasi dari PostgreSQL backend
+  Future<void> fetchFromApi() async {
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      final backendList = await _apiService.getNotifications();
+      if (backendList != null && backendList.isNotEmpty) {
+        _items = backendList;
+        notifyListeners();
+      }
+    } catch (e) {
+      debugPrint('[NotificationRepository] Fetch error: $e');
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
 
   List<AppNotification> getAll() => List.unmodifiable(_items);
 
@@ -21,6 +48,8 @@ class NotificationRepository extends ChangeNotifier {
     if (index == -1 || _items[index].isRead) return;
     _items[index] = _items[index].copyWith(isRead: true);
     notifyListeners();
+
+    _apiService.markAsRead(id);
   }
 
   void markAllRead() {
@@ -28,6 +57,7 @@ class NotificationRepository extends ChangeNotifier {
     for (var index = 0; index < _items.length; index++) {
       if (!_items[index].isRead) {
         _items[index] = _items[index].copyWith(isRead: true);
+        _apiService.markAsRead(_items[index].id);
         changed = true;
       }
     }
@@ -52,23 +82,6 @@ class NotificationRepository extends ChangeNotifier {
         body: 'Kode klaimmu #BGR-9482 telah siap diambil di Kantin Rektorat.',
         createdAt: now.subtract(const Duration(minutes: 18)),
         isRead: false,
-      ),
-      AppNotification(
-        id: 'notification-003',
-        type: AppNotificationType.reminder,
-        title: 'Pengingat: Waktu Pengambilan',
-        body: 'Pesanan donasi Nasi Bento akan segera melewati batas pengambilan.',
-        createdAt: now.subtract(const Duration(hours: 1)),
-        isRead: true,
-      ),
-      AppNotification(
-        id: 'notification-004',
-        type: AppNotificationType.newListing,
-        title: 'Listing baru: Buah Potong Segar',
-        body: 'Ada makanan surplus baru yang bisa kamu selamatkan di kampus.',
-        createdAt: now.subtract(const Duration(days: 1, hours: 2)),
-        isRead: true,
-        refId: 'food-006',
       ),
     ];
   }

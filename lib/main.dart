@@ -52,6 +52,8 @@ class BagiRasaApp extends StatelessWidget {
               }
             };
             repo.startTicker();
+            // Sinkronisasi data riwayat klaim dari server backend jika online
+            repo.syncFromBackend();
             if (kShowDemoControls) {
               WidgetsBinding.instance.addPostFrameCallback((_) {
                 repo.seedDemoData();

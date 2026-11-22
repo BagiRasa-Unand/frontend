@@ -5,16 +5,20 @@ import '../../../core/app_session.dart';
 import '../../donasi/data/food_listing.dart';
 import '../../donasi/data/food_listing_repository.dart';
 import 'claim.dart';
+import 'claim_api_service.dart';
 
 class ClaimRepository extends ChangeNotifier {
   ClaimRepository({
     required this.foodRepo,
+    ClaimApiService? apiService,
     DateTime Function()? clock,
-  })  : _clock = clock ?? DateTime.now {
+  })  : apiService = apiService ?? ClaimApiService(),
+        _clock = clock ?? DateTime.now {
     foodRepo.addListener(_onFoodRepoChanged);
   }
 
   final FoodListingRepository foodRepo;
+  final ClaimApiService apiService;
   final DateTime Function() _clock;
   final List<Claim> _claims = [];
 
@@ -187,6 +191,9 @@ class ClaimRepository extends ChangeNotifier {
     _emit(ClaimEventType.submitted, claim);
     notifyListeners();
 
+    // Kirim sinkronisasi ke backend API
+    _syncCreateClaimToBackend(claim, currentListing.id, quantity);
+
     return ClaimResult.success(claim);
   }
 
@@ -231,6 +238,9 @@ class ClaimRepository extends ChangeNotifier {
 
     reconcile();
 
+    // Kirim sinkronisasi ke backend API
+    _syncDecisionToBackend(claim.id, 'ACCEPT');
+
     return ClaimResult.success(accepted);
   }
 
@@ -264,6 +274,9 @@ class ClaimRepository extends ChangeNotifier {
     _emit(ClaimEventType.rejected, rejected);
     notifyListeners();
 
+    // Kirim sinkronisasi ke backend API
+    _syncDecisionToBackend(claim.id, 'REJECT', reason: reason);
+
     return ClaimResult.success(rejected);
   }
 
@@ -292,7 +305,116 @@ class ClaimRepository extends ChangeNotifier {
     _emit(ClaimEventType.cancelled, cancelled);
     notifyListeners();
 
+    // Kirim sinkronisasi ke backend API
+    _syncCancelToBackend(claim.id, reason: 'Dibatalkan oleh pemohon');
+
     return ClaimResult.success(cancelled);
+  }
+
+  // --- Backend API Synchronization ---
+
+  Future<void> syncFromBackend() async {
+    try {
+      final myClaims = await apiService.getMyClaims();
+      final incoming = await apiService.getIncomingClaims();
+
+      bool hasChanges = false;
+      if (myClaims != null && myClaims.isNotEmpty) {
+        for (final item in myClaims) {
+          final idx = _claims.indexWhere((c) => c.id == item.id);
+          if (idx != -1) {
+            _claims[idx] = item;
+          } else {
+            _claims.add(item);
+          }
+          hasChanges = true;
+        }
+      }
+
+      if (incoming != null && incoming.isNotEmpty) {
+        for (final item in incoming) {
+          final idx = _claims.indexWhere((c) => c.id == item.id);
+          if (idx != -1) {
+            _claims[idx] = item;
+          } else {
+            _claims.add(item);
+          }
+          hasChanges = true;
+        }
+      }
+
+      if (hasChanges) {
+        notifyListeners();
+      }
+    } catch (e) {
+      debugPrint('⚠️ Error sinkronisasi data dari backend: $e');
+    }
+  }
+
+  Future<void> _syncCreateClaimToBackend(
+    Claim localClaim,
+    String listingId,
+    int quantity,
+  ) async {
+    try {
+      final backendClaim = await apiService.createClaim(
+        donationId: listingId,
+        portionCount: quantity,
+      );
+      if (backendClaim != null) {
+        final idx = _claims.indexWhere((c) => c.id == localClaim.id);
+        if (idx != -1) {
+          _claims[idx] = backendClaim;
+          notifyListeners();
+        }
+      }
+    } catch (e) {
+      debugPrint('⚠️ Error submit klaim ke backend: $e');
+    }
+  }
+
+  Future<void> _syncDecisionToBackend(
+    String claimId,
+    String action, {
+    String? reason,
+  }) async {
+    try {
+      await apiService.decideClaim(
+        claimId: claimId,
+        action: action,
+        reason: reason,
+      );
+    } catch (e) {
+      debugPrint('⚠️ Error kirim keputusan klaim ke backend: $e');
+    }
+  }
+
+  Future<void> _syncCancelToBackend(
+    String claimId, {
+    String? reason,
+  }) async {
+    try {
+      await apiService.cancelClaim(
+        claimId: claimId,
+        reason: reason,
+      );
+    } catch (e) {
+      debugPrint('⚠️ Error batalkan klaim ke backend: $e');
+    }
+  }
+
+  Future<bool> verifyPickup(String claimCode) async {
+    try {
+      final verified = await apiService.verifyPickup(claimCode: claimCode);
+      if (verified != null) {
+        _updateClaim(verified);
+        notifyListeners();
+        return true;
+      }
+    } catch (e) {
+      debugPrint('⚠️ Error verifikasi pickup ke backend: $e');
+    }
+    return false;
   }
 
   // --- Internal & Lifecycle ---

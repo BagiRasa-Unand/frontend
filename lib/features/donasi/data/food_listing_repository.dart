@@ -28,7 +28,7 @@ class FoodListingRepository extends ChangeNotifier {
         categoryId: categoryId,
       );
 
-      if (backendList != null && backendList.isNotEmpty) {
+      if (backendList != null) {
         _items = backendList;
         notifyListeners();
       }
@@ -54,7 +54,7 @@ class FoodListingRepository extends ChangeNotifier {
       );
 
   void add(FoodListing listing) {
-    _items.add(listing);
+    _items.insert(0, listing);
     notifyListeners();
 
     _syncAdd(listing);
@@ -72,8 +72,15 @@ class FoodListingRepository extends ChangeNotifier {
           _items[idx] = created;
           notifyListeners();
         }
+      } else {
+        // Rollback jika server backend menolak agar UI tidak menampilkan data palsu
+        _items.removeWhere((item) => item.id == listing.id);
+        notifyListeners();
+        debugPrint('⚠️ [FoodListingRepository] Donasi ditolak backend, rollback data lokal.');
       }
     } catch (e) {
+      _items.removeWhere((item) => item.id == listing.id);
+      notifyListeners();
       debugPrint('[FoodListingRepository] Sync add error: $e');
     }
   }

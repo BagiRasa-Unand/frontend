@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
+import 'package:http_parser/http_parser.dart';
 import '../../../core/network/api_config.dart';
 import 'food_listing.dart';
 
@@ -105,13 +106,29 @@ class DonationApiService {
         request.fields['isHalal'] = 'true';
 
         if (isLocalFile) {
-          final file = await http.MultipartFile.fromPath('photos', cleanPath);
+          final ext = cleanPath.split('.').last.toLowerCase();
+          final subType = (ext == 'png' || ext == 'webp') ? ext : 'jpeg';
+          final file = await http.MultipartFile.fromPath(
+            'photos',
+            cleanPath,
+            contentType: MediaType('image', subType),
+          );
           request.files.add(file);
         } else if (isBase64) {
           final separator = cleanPath.indexOf(',');
           if (separator > 0) {
+            String subType = 'jpeg';
+            final header = cleanPath.substring(0, separator);
+            if (header.contains('png')) subType = 'png';
+            if (header.contains('webp')) subType = 'webp';
+
             final bytes = base64Decode(cleanPath.substring(separator + 1));
-            final file = http.MultipartFile.fromBytes('photos', bytes, filename: 'upload.jpg');
+            final file = http.MultipartFile.fromBytes(
+              'photos',
+              bytes,
+              filename: 'upload.$subType',
+              contentType: MediaType('image', subType),
+            );
             request.files.add(file);
           }
         }

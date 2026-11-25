@@ -54,52 +54,55 @@ class _HomeScreenBody extends StatelessWidget {
       body: SafeArea(
         child: Stack(
           children: [
-            CustomScrollView(
-            slivers: [
-              const SliverToBoxAdapter(child: SizedBox(height: 64)),
-              SliverPadding(
-                padding: const EdgeInsets.fromLTRB(20, 4, 20, 112),
-                sliver: SliverList(
-                  delegate: SliverChildListDelegate([
-                    const _GreetingBanner(),
-                    const SizedBox(height: 16),
-                    _SearchBar(controller: controller),
-                    const SizedBox(height: 8),
-                    _FilterBar(controller: controller),
-                    const SizedBox(height: 16),
-                    const _ResultsHeading(),
-                    const SizedBox(height: 12),
-                    if (controller.visibleListings.isEmpty)
-                      const _EmptyResults()
-                    else
-                      ...controller.visibleListings.map((listing) {
-                        final pickupPoint = controller.pickupPointRepository
-                            .getById(listing.pickupPointId);
-                        return Padding(
-                          padding: const EdgeInsets.only(bottom: 12),
-                          child: FoodListingCard(
-                            listing: listing,
-                            pickupPointName:
-                                pickupPoint?.name ?? 'Titik pengambilan',
-                            now: controller.now,
-                            onTap: () => Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (_) => ListingDetailScreen(
-                                  listingId: listing.id,
-                                  showOwnerActions: false,
+            RefreshIndicator(
+              onRefresh: () => controller.listingRepository.fetchFromApi(),
+              child: CustomScrollView(
+                slivers: [
+                  const SliverToBoxAdapter(child: SizedBox(height: 64)),
+                  SliverPadding(
+                    padding: const EdgeInsets.fromLTRB(20, 4, 20, 112),
+                    sliver: SliverList(
+                      delegate: SliverChildListDelegate([
+                        const _GreetingBanner(),
+                        const SizedBox(height: 16),
+                        _SearchBar(controller: controller),
+                        const SizedBox(height: 8),
+                        _FilterBar(controller: controller),
+                        const SizedBox(height: 16),
+                        const _ResultsHeading(),
+                        const SizedBox(height: 12),
+                        if (controller.visibleListings.isEmpty)
+                          const _EmptyResults()
+                        else
+                          ...controller.visibleListings.map((listing) {
+                            final pickupPoint = controller.pickupPointRepository
+                                .getById(listing.pickupPointId);
+                            return Padding(
+                              padding: const EdgeInsets.only(bottom: 12),
+                              child: FoodListingCard(
+                                listing: listing,
+                                pickupPointName:
+                                    pickupPoint?.name ?? 'Titik pengambilan',
+                                now: controller.now,
+                                onTap: () => Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (_) => ListingDetailScreen(
+                                      listingId: listing.id,
+                                      showOwnerActions: false,
+                                    ),
+                                  ),
                                 ),
                               ),
-                            ),
-                          ),
-                        );
-                      }),
-                    const SizedBox(height: 4),
-                    const _ImpactBanner(),
-                  ]),
-                ),
+                            );
+                          }),
+                        const SizedBox(height: 4),
+                        const _ImpactBanner(),
+                      ]),
+                    ),
+                  ),
+                ],
               ),
-            ],
-          ),
+            ),
             Positioned(
               top: 0,
               left: 0,
@@ -249,11 +252,10 @@ class _GreetingBanner extends StatelessWidget {
             ),
           ],
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 12),
         Container(
-          height: 198,
           width: double.infinity,
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
           decoration: BoxDecoration(
             color: AppColors.primary,
             borderRadius: BorderRadius.circular(AppRadius.r20),
@@ -266,31 +268,57 @@ class _GreetingBanner extends StatelessWidget {
             ],
           ),
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              SizedBox(
-                width: 114,
+              Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text('AKSI BAIK HARI INI', maxLines: 1,
-                      overflow: TextOverflow.clip,
-                      style: AppTextStyles.overline.copyWith(
-                        color: AppColors.reward)),
-                    Text('Yuk,\nselamatkan\nmakanan hari\nini!',
-                      maxLines: 4,
-                      overflow: TextOverflow.clip,
-                        style: AppTextStyles.heading.copyWith(
-                            color: AppColors.surface, height: 25 / 18)),
-                    Text('Bantu kantin tekan limbah dan isi perutmu.',
-                      maxLines: 3,
-                      overflow: TextOverflow.clip,
-                        style: AppTextStyles.caption.copyWith(
-                            color: AppColors.bannerShadow, height: 16 / 12)),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                      decoration: BoxDecoration(
+                        color: Colors.black.withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(AppRadius.r9999),
+                      ),
+                      child: Text(
+                        'AKSI BAIK HARI INI',
+                        style: AppTextStyles.overline.copyWith(
+                          color: AppColors.reward,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Yuk, selamatkan makanan hari ini!',
+                      style: AppTextStyles.heading.copyWith(
+                        color: AppColors.surface,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w800,
+                        height: 1.25,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      'Bantu kantin tekan limbah dan isi perutmu.',
+                      style: AppTextStyles.caption.copyWith(
+                        color: AppColors.surface.withValues(alpha: 0.9),
+                        fontSize: 13,
+                        height: 1.35,
+                      ),
+                    ),
                   ],
                 ),
               ),
-              Image.asset('assets/images/rasi_worried.png', width: 76, height: 76),
+              const SizedBox(width: 16),
+              Image.asset(
+                'assets/images/rasi_worried.png',
+                width: 86,
+                height: 86,
+                fit: BoxFit.contain,
+              ),
             ],
           ),
         ),
@@ -306,25 +334,22 @@ class _SearchBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: TextField(
-        onChanged: controller.setSearchQuery,
-        decoration: InputDecoration(
-          hintText: 'Cari makanan lezat di kampus...',
-          hintStyle: AppTextStyles.body.copyWith(color: AppColors.textSecondary),
-          prefixIcon: const Icon(Icons.search_rounded, color: AppColors.tealDeep),
-          filled: true,
-          fillColor: AppColors.surface,
-          contentPadding: const EdgeInsets.symmetric(vertical: 14),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(AppRadius.r16),
-            borderSide: const BorderSide(color: AppColors.border, width: 1.5),
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(AppRadius.r16),
-            borderSide: const BorderSide(color: AppColors.border, width: 1.5),
-          ),
+    return TextField(
+      onChanged: controller.setSearchQuery,
+      decoration: InputDecoration(
+        hintText: 'Cari makanan lezat di kampus...',
+        hintStyle: AppTextStyles.body.copyWith(color: AppColors.textSecondary),
+        prefixIcon: const Icon(Icons.search_rounded, color: AppColors.tealDeep),
+        filled: true,
+        fillColor: AppColors.surface,
+        contentPadding: const EdgeInsets.symmetric(vertical: 14),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(AppRadius.r16),
+          borderSide: const BorderSide(color: AppColors.border, width: 1.5),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(AppRadius.r16),
+          borderSide: const BorderSide(color: AppColors.border, width: 1.5),
         ),
       ),
     );
@@ -339,9 +364,9 @@ class _FilterBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 58,
+      height: 52,
       child: ListView(
-        padding: const EdgeInsets.fromLTRB(20, 14, 20, 8),
+        padding: const EdgeInsets.symmetric(vertical: 4),
         scrollDirection: Axis.horizontal,
         children: [
           _TypeChip(
@@ -517,7 +542,7 @@ class _ResultsHeading extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 8, 20, 12),
+      padding: const EdgeInsets.only(top: 8, bottom: 4),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [

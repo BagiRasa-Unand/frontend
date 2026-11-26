@@ -1,4 +1,4 @@
-// TODO(integrate): replace with Module A FoodListing
+import '../../donasi/data/food_listing.dart';
 
 /// Status ketersediaan listing makanan pada peta.
 enum MapListingStatus {
@@ -46,6 +46,61 @@ class MapListing {
   final String? photoAsset;
   final int distanceMeters;
   final String categoryKey;
+
+  /// Konversi dari [FoodListing] (Module A) ke [MapListing] (Module C).
+  factory MapListing.fromFoodListing(
+    FoodListing food, {
+    String pickupPointName = '',
+  }) {
+    final now = DateTime.now();
+    final listingStatus = food.statusAt(now);
+
+    // Hanya tampilkan donasi yang masih aktif di peta
+    final mapStatus = listingStatus == ListingStatus.segeraHabis
+        ? MapListingStatus.segeraHabis
+        : MapListingStatus.tersedia;
+
+    // Format sisa waktu: "s.d HH.mm"
+    final deadline = food.expiresAt;
+    final timeLeftStr =
+        's.d ${deadline.hour.toString().padLeft(2, '0')}.${deadline.minute.toString().padLeft(2, '0')}';
+
+    // Kategori label & key
+    String catLabel = 'Makanan Berat';
+    String catKey = 'makanan_berat';
+    switch (food.foodType) {
+      case FoodType.camilan:
+        catLabel = 'Snack';
+        catKey = 'snack';
+        break;
+      case FoodType.minuman:
+        catLabel = 'Minuman';
+        catKey = 'minuman';
+        break;
+      case FoodType.lainnya:
+        catLabel = 'Lainnya';
+        catKey = 'lainnya';
+        break;
+      case FoodType.makananBerat:
+        break;
+    }
+
+    return MapListing(
+      id: food.id,
+      name: food.name,
+      pickupPointId: food.pickupPointId,
+      pickupPointName: pickupPointName,
+      categoryLabel: catLabel,
+      categoryKey: catKey,
+      distanceText: '– m',
+      distanceMeters: 500,
+      timeLeft: timeLeftStr,
+      pickupDeadline: deadline,
+      status: mapStatus,
+      portionCount: food.quantityRemaining,
+      photoAsset: food.photoPath,
+    );
+  }
 }
 
 /// Data dummy listing aktif yang dicocokkan dengan screenshot Figma.

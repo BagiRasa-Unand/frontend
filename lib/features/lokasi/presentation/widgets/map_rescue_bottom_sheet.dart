@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/network/api_config.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_text_styles.dart';
@@ -285,48 +286,58 @@ class _ListingCard extends StatelessWidget {
   }
 
   Widget _buildThumbnail(bool isUrgent) {
-    return Container(
-      width: 72,
-      height: 72,
-      decoration: BoxDecoration(
-        color: AppColors.surfaceWarm,
-        borderRadius: BorderRadius.circular(AppRadius.r14),
-        border: Border.all(color: AppColors.border, width: 1),
-      ),
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          // Illustration / Food Icon
-          Icon(
-            listing.categoryKey == 'snack'
-                ? Icons.bakery_dining_rounded
-                : Icons.lunch_dining_rounded,
-            size: 36,
-            color: isUrgent ? AppColors.amber : AppColors.primary,
-          ),
+    // Tentukan apakah ada foto asli dari donasi
+    final photoUrl = listing.photoAsset;
+    final hasPhoto = photoUrl != null && photoUrl.isNotEmpty;
 
-          // Tag overlay in corner
-          if (listing.discountTag != null)
-            Positioned(
-              right: 4,
-              bottom: 4,
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
-                decoration: BoxDecoration(
-                  color: AppColors.surface.withValues(alpha: 0.92),
-                  borderRadius: BorderRadius.circular(AppRadius.r4),
-                ),
-                child: Text(
-                  listing.discountTag!,
-                  style: AppTextStyles.photoTag.copyWith(
-                    color: listing.discountTag!.startsWith('-')
-                        ? AppColors.primary
-                        : AppColors.tealDeep,
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(AppRadius.r14),
+      child: Container(
+        width: 72,
+        height: 72,
+        decoration: BoxDecoration(
+          color: AppColors.surfaceWarm,
+          borderRadius: BorderRadius.circular(AppRadius.r14),
+          border: Border.all(color: AppColors.border, width: 1),
+        ),
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            // Foto asli jika ada, fallback ke icon
+            if (hasPhoto)
+              _FoodPhoto(url: photoUrl)
+            else
+              Icon(
+                listing.categoryKey == 'snack'
+                    ? Icons.bakery_dining_rounded
+                    : Icons.lunch_dining_rounded,
+                size: 36,
+                color: isUrgent ? AppColors.amber : AppColors.primary,
+              ),
+
+            // Tag overlay in corner (tidak ditampilkan jika sudah ada foto)
+            if (!hasPhoto && listing.discountTag != null)
+              Positioned(
+                right: 4,
+                bottom: 4,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
+                  decoration: BoxDecoration(
+                    color: AppColors.surface.withValues(alpha: 0.92),
+                    borderRadius: BorderRadius.circular(AppRadius.r4),
+                  ),
+                  child: Text(
+                    listing.discountTag!,
+                    style: AppTextStyles.photoTag.copyWith(
+                      color: listing.discountTag!.startsWith('-')
+                          ? AppColors.primary
+                          : AppColors.tealDeep,
+                    ),
                   ),
                 ),
               ),
-            ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -387,6 +398,51 @@ class _ListingCard extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+/// Widget untuk menampilkan foto makanan dari URL (network) dengan fallback icon.
+class _FoodPhoto extends StatelessWidget {
+  const _FoodPhoto({required this.url});
+
+  final String url;
+
+  bool get _isNetwork =>
+      url.startsWith('http://') || url.startsWith('https://');
+
+  @override
+  Widget build(BuildContext context) {
+    if (!_isNetwork) {
+      return const SizedBox.shrink();
+    }
+
+    // Pastikan URL sudah lengkap (resolve jika path relatif)
+    final resolvedUrl = ApiConfig.resolveImageUrl(url) ?? url;
+
+    return Image.network(
+      resolvedUrl,
+      width: 72,
+      height: 72,
+      fit: BoxFit.cover,
+      errorBuilder: (context, error, _) => const Icon(
+        Icons.lunch_dining_rounded,
+        size: 36,
+        color: AppColors.primary,
+      ),
+      loadingBuilder: (context, child, progress) {
+        if (progress == null) return child;
+        return const Center(
+          child: SizedBox(
+            width: 20,
+            height: 20,
+            child: CircularProgressIndicator(
+              strokeWidth: 2,
+              color: AppColors.primary,
+            ),
+          ),
+        );
+      },
     );
   }
 }

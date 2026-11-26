@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
+import '../../donasi/data/food_listing.dart';
+import '../../donasi/data/food_listing_repository.dart';
 import '../data/map_listing.dart';
 import '../data/pickup_point.dart';
 import '../data/pickup_point_repository.dart';
@@ -16,12 +18,46 @@ enum MapFilterType {
 
 /// Controller & State Notifier untuk layar Peta Utama (Module C).
 class MapNotifier extends ChangeNotifier {
-  MapNotifier(this._pickupRepo) {
-    _allListings = seedMapListings();
+  MapNotifier(this._pickupRepo, this._foodRepo) {
+    // Konversi FoodListing dari backend → MapListing untuk peta
+    _syncFromFoodRepo();
+    // Dengarkan perubahan pada FoodListingRepository & PickupPointRepository
+    _foodRepo.addListener(_syncFromFoodRepo);
+    _pickupRepo.addListener(_syncFromFoodRepo);
   }
 
   final PickupPointRepository _pickupRepo;
-  late final List<MapListing> _allListings;
+  final FoodListingRepository _foodRepo;
+  List<MapListing> _allListings = [];
+
+  /// Konversi semua FoodListing aktif menjadi MapListing.
+  void _syncFromFoodRepo() {
+    final now = DateTime.now();
+    _allListings = _foodRepo
+        .getAll()
+        .where((food) {
+          final status = food.statusAt(now);
+          // Hanya tampilkan yang masih tersedia atau segera habis di peta
+          return status == ListingStatus.tersedia ||
+              status == ListingStatus.segeraHabis;
+        })
+        .map((food) {
+          final point = _pickupRepo.getById(food.pickupPointId);
+          return MapListing.fromFoodListing(
+            food,
+            pickupPointName: point?.name ?? '',
+          );
+        })
+        .toList();
+    notifyListeners();
+  }
+
+  @override
+  void dispose() {
+    _foodRepo.removeListener(_syncFromFoodRepo);
+    _pickupRepo.removeListener(_syncFromFoodRepo);
+    super.dispose();
+  }
 
   final MapController mapController = MapController();
   final ScrollController sheetScrollController = ScrollController();
@@ -110,6 +146,14 @@ class MapNotifier extends ChangeNotifier {
     final listings =
         _allListings.where((l) => l.pickupPointId == pickupPointId).toList();
     return listings.fold(0, (acc, item) => acc + item.portionCount);
+  }
+
+  /// Foto makanan pertama yang ada di pickup point ini (untuk ditampilkan di pin peta).
+  String? photoForPickupPoint(String pickupPointId) {
+    final listing = _allListings
+        .where((l) => l.pickupPointId == pickupPointId && l.photoAsset != null && l.photoAsset!.isNotEmpty)
+        .firstOrNull;
+    return listing?.photoAsset;
   }
 
   void setFilter(MapFilterType filter) {

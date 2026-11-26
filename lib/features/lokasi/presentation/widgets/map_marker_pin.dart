@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import '../../../../core/network/api_config.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_text_styles.dart';
@@ -14,6 +15,7 @@ class MapMarkerPin extends StatelessWidget {
     required this.status,
     required this.onTap,
     this.isSelected = false,
+    this.photoUrl,
   });
 
   final String title;
@@ -21,6 +23,9 @@ class MapMarkerPin extends StatelessWidget {
   final MapListingStatus status;
   final VoidCallback onTap;
   final bool isSelected;
+
+  /// URL foto makanan (bisa null jika tidak ada foto).
+  final String? photoUrl;
 
   bool get _isUrgent => status == MapListingStatus.segeraHabis;
 
@@ -124,11 +129,10 @@ class MapMarkerPin extends StatelessWidget {
     final bgColor = _isUrgent ? AppColors.amber : AppColors.tealDeep;
     final shadowColor = _isUrgent ? AppColors.amberDark : AppColors.tealDark;
     final iconColor = _isUrgent ? AppColors.textPrimary : AppColors.surface;
-    final iconData = _isUrgent
-        ? Icons.timer_rounded
-        : (title.toLowerCase().contains('rektorat')
-            ? Icons.bakery_dining_rounded
-            : Icons.restaurant_rounded);
+
+    // Cek apakah ada foto asli
+    final resolvedPhoto = ApiConfig.resolveImageUrl(photoUrl);
+    final hasPhoto = resolvedPhoto != null && resolvedPhoto.isNotEmpty;
 
     return SizedBox(
       width: 48,
@@ -172,12 +176,33 @@ class MapMarkerPin extends StatelessWidget {
                 ),
               ],
             ),
-            child: Center(
-              child: Icon(
-                iconData,
-                color: iconColor,
-                size: 22,
-              ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(AppRadius.r14),
+              child: hasPhoto
+                  ? Image.network(
+                      resolvedPhoto,
+                      width: 44,
+                      height: 44,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, e, s) => Center(
+                        child: Icon(
+                          Icons.restaurant_rounded,
+                          color: iconColor,
+                          size: 22,
+                        ),
+                      ),
+                    )
+                  : Center(
+                      child: Icon(
+                        _isUrgent
+                            ? Icons.timer_rounded
+                            : (title.toLowerCase().contains('rektorat')
+                                ? Icons.bakery_dining_rounded
+                                : Icons.restaurant_rounded),
+                        color: iconColor,
+                        size: 22,
+                      ),
+                    ),
             ),
           ),
         ],

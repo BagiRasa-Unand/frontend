@@ -7,6 +7,7 @@ import '../../../core/theme/app_radius.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../data/pickup_point_repository.dart';
 import '../data/map_listing.dart';
+import '../../donasi/data/food_listing_repository.dart';
 import '../logic/map_controller.dart';
 import 'countdown_screen.dart';
 import 'location_gate_view.dart';
@@ -24,7 +25,10 @@ class MapScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (ctx) => MapNotifier(ctx.read<PickupPointRepository>()),
+      create: (ctx) => MapNotifier(
+        ctx.read<PickupPointRepository>(),
+        ctx.read<FoodListingRepository>(),
+      ),
       child: const _MapScreenBody(),
     );
   }
@@ -115,6 +119,7 @@ class _MapScreenBody extends StatelessWidget {
                       portionCount: portions,
                       status: status,
                       isSelected: isSelected,
+                      photoUrl: notifier.photoForPickupPoint(point.id),
                       onTap: () {
                         notifier.selectPickupPoint(point.id);
                       },
